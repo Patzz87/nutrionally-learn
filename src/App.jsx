@@ -501,7 +501,7 @@ function Screen2({lang,state,setState,setScreen,isMobile}) {
             </div>
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:8,marginTop:4}}>
-            <button onClick={()=>setScreen("s3")} style={{padding:"11px 0",borderRadius:8,background:"#2563EB",color:"#fff",fontSize:13,fontWeight:500,border:"none",cursor:"pointer",fontFamily:F}}>
+            <button onClick={()=>window.location.href="/intercambios"} style={{padding:"11px 0",borderRadius:8,background:"#2563EB",color:"#fff",fontSize:13,fontWeight:500,border:"none",cursor:"pointer",fontFamily:F}}>
               {isES?"Ver plan de intercambios →":"View exchange plan →"}
             </button>
             <button onClick={()=>setScreen("s1")} style={{padding:"9px 0",borderRadius:8,background:"transparent",color:"#3A5BA0",fontSize:12,fontWeight:500,border:"0.5px solid #D4E3FF",cursor:"pointer",fontFamily:F}}>
