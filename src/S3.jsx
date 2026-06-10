@@ -202,6 +202,115 @@ function AlertBox({ level, badge, explain, studyMode }) {
   );
 }
 
+function EquivPanel({isES}) {
+  const [open, setOpen] = useState(false);
+  const rows = [
+    {g:isES?"Lacteos semidescremados":"Semi-skimmed dairy", prot:8, lip:4, hc:12, por:"240 ml"},
+    {g:isES?"Carnes bajas en grasa":"Lean meats", prot:7, lip:2, hc:0, por:"90 g"},
+    {g:isES?"Carnes moderadas":"Medium-fat meats", prot:7, lip:5, hc:0, por:"90 g"},
+    {g:isES?"Carnes altas en grasa":"High-fat meats", prot:7, lip:8, hc:0, por:"90 g"},
+    {g:isES?"Leguminosas":"Legumes", prot:7, lip:1, hc:15, por:isES?"1/2 taza":"1/2 cup"},
+    {g:isES?"Cereales":"Cereals", prot:2, lip:1, hc:15, por:isES?"varía":"varies"},
+    {g:isES?"Verduras":"Vegetables", prot:2, lip:0, hc:5, por:isES?"1/2 taza":"1/2 cup"},
+    {g:isES?"Frutas":"Fruits", prot:0, lip:0, hc:15, por:isES?"varía":"varies"},
+    {g:isES?"Grasas":"Fats", prot:0, lip:5, hc:0, por:isES?"1 cdita":"1 tsp"},
+    {g:isES?"Accesorios":"Accessories", prot:0, lip:0, hc:10, por:isES?"varía":"varies"},
+  ];
+  return (
+    <div style={{background:"#fff", border:"0.5px solid #D4E3FF", borderRadius:12, overflow:"hidden"}}>
+      <div onClick={()=>setOpen(!open)} style={{padding:"12px 16px", display:"flex", justifyContent:"space-between", alignItems:"center", cursor:"pointer", borderBottom: open?"0.5px solid #D4E3FF":"none"}}>
+        <span style={{fontSize:13, fontWeight:500, color:"#1E2D4E", fontFamily:FONT}}>{isES?"Equivalencias de alimentos":"Food equivalencies"}</span>
+        <span style={{fontSize:14, color:"#3A5BA0"}}>{open?"▲":"▼"}</span>
+      </div>
+      {open && (
+        <div style={{overflowX:"auto"}}>
+          <table style={{width:"100%", borderCollapse:"collapse", fontFamily:FONT}}>
+            <thead>
+              <tr style={{background:"#F5F7FF"}}>
+                {[isES?"Grupo":"Group", isES?"Porcion":"Portion", "Prot", isES?"Lip":"Fat", "HC"].map((h,i)=>(
+                  <th key={i} style={{padding:"7px 12px", fontSize:10, fontWeight:500, color:"#3A5BA0", textTransform:"uppercase", letterSpacing:"0.05em", borderBottom:"0.5px solid #D4E3FF", textAlign:i===0?"left":"center"}}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r,i)=>(
+                <tr key={i} style={{borderBottom:"0.5px solid #F0F4FF", background:i%2===0?"#fff":"#F9FBFF"}}>
+                  <td style={{padding:"7px 12px", fontSize:12, color:"#1E2D4E", fontWeight:500}}>{r.g}</td>
+                  <td style={{padding:"7px 12px", fontSize:11, color:"#3A5BA0", textAlign:"center"}}>{r.por}</td>
+                  <td style={{padding:"7px 12px", textAlign:"center"}}><span style={{display:"inline-block", padding:"2px 8px", borderRadius:20, fontSize:11, fontWeight:600, background:"#EFF6FF", color:"#2563EB"}}>{r.prot}</span></td>
+                  <td style={{padding:"7px 12px", textAlign:"center"}}><span style={{display:"inline-block", padding:"2px 8px", borderRadius:20, fontSize:11, fontWeight:600, background:"#FAEEDA", color:"#854F0B"}}>{r.lip}</span></td>
+                  <td style={{padding:"7px 12px", textAlign:"center"}}><span style={{display:"inline-block", padding:"2px 8px", borderRadius:20, fontSize:11, fontWeight:600, background:"#D4E3FF", color:"#0C447C"}}>{r.hc}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div style={{padding:"8px 16px", background:"#F5F7FF", fontSize:10, color:"#3A5BA0", fontFamily:FONT}}>Valores por 1 intercambio · INCAP / USDA</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+async function exportPDF(patient, exchanges, totals, isES, withStudy) {
+  if (!window.jspdf) {
+    await new Promise((res, rej) => {
+      const script = document.createElement("script");
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+      script.onload = res; script.onerror = rej;
+      document.head.appendChild(script);
+    });
+  }
+  const jsPDF = window.jspdf.jsPDF;
+  const doc = new jsPDF({unit:"mm", format:"a4"});
+  const W=210, MG=14; let y=14;
+  const NAVY=[30,45,78], BLUE=[37,99,235], WHITE=[255,255,255], GRAY=[90,100,120], LIGHT=[245,247,255];
+  const sf = (sz,st,col) => { doc.setFontSize(sz); doc.setFont("helvetica",st||"normal"); doc.setTextColor(...(col||NAVY)); };
+  const rc = (x,yy,w,h,fill) => { doc.setFillColor(...fill); doc.setDrawColor(...fill); doc.roundedRect(x,yy,w,h,1,1,"F"); };
+  const wkg = +(patient.weightLb*0.4536).toFixed(1);
+  const hcm2 = +(patient.heightIn*2.54).toFixed(1);
+  const hm = +(patient.heightIn*0.0254).toFixed(2);
+  const vet = patient.vet||1582;
+  const geb = Math.round(patient.sex==="F"?(655+9.6*wkg+1.9*hcm2-4.7*patient.age):(66+13.8*wkg+5*hcm2-6.8*patient.age));
+  const dateStr = new Date().toLocaleDateString(isES?"es-ES":"en-US",{year:"numeric",month:"short",day:"numeric"});
+  doc.setFillColor(...NAVY); doc.rect(0,0,W,22,"F");
+  sf(15,"bold",WHITE); doc.text("nutrionally",MG,14);
+  sf(10,"normal",[147,197,253]); doc.text("learn",MG+34,14);
+  sf(8,"normal",[147,197,253]); doc.text(isES?"Plan Nutricional Educativo":"Educational Nutrition Plan",MG,19);
+  doc.text(dateStr,W-MG,19,{align:"right"}); y=30;
+  rc(MG,y,W-2*MG,13,LIGHT);
+  [{l:"Caso",v:patient.caseName||"—"},{l:"Sexo",v:patient.sex==="F"?"F":"M"},{l:"Peso",v:wkg+"kg"},{l:"VET",v:vet+"kcal"},{l:"Cond.",v:patient.condition==="dm2"?"DM2":patient.condition==="obesity"?"Obeso":"Normal"}].forEach((inf,i)=>{
+    const x=MG+i*(W-2*MG)/5+1; sf(7,"normal",GRAY); doc.text(inf.l.toUpperCase(),x,y+4); sf(8,"bold",NAVY); doc.text(String(inf.v),x,y+10);
+  }); y+=19;
+  if (withStudy) {
+    sf(9,"bold",[124,58,237]); doc.text(isES?"Harris-Benedict (valores del caso)":"Harris-Benedict (case values)",MG,y); y+=4;
+    doc.setDrawColor(209,196,252); doc.setLineWidth(0.2); doc.line(MG,y,W-MG,y); y+=4;
+    const formula = patient.sex==="F"?`GEB=655+(9.6x${wkg})+(1.9x${hcm2})-(4.7x${patient.age})=${geb}kcal`:`GEB=66+(13.8x${wkg})+(5x${hcm2})-(6.8x${patient.age})=${geb}kcal`;
+    rc(MG,y,W-2*MG,13,[245,240,255]); sf(7,"normal",[76,29,149]);
+    doc.text(formula,MG+2,y+5); doc.text(`VET=${({bajar:20,mantener:24,subir:28}[patient.goal||"mantener"])}kcal/kg x ${wkg}kg=${vet}kcal`,MG+2,y+10); y+=18;
+  }
+  sf(10,"bold",NAVY); doc.text(isES?"Plan de Intercambios":"Exchange Plan",MG,y); y+=5;
+  doc.setDrawColor(212,227,255); doc.setLineWidth(0.2); doc.line(MG,y,W-MG,y); y+=3;
+  const eTH=["Grupo","N","Prot","Lip","HC"], eTW=[52,15,15,15,15]; let mx=MG;
+  eTH.forEach((h,i)=>{ rc(mx,y,eTW[i],6,BLUE); sf(7,"bold",WHITE); doc.text(h,mx+eTW[i]/2,y+4.5,{align:"center"}); mx+=eTW[i]; }); y+=7;
+  const GRP=[{key:"lac_semi",label:"Lacteos"},{key:"carne_baja",label:"Carnes bajas"},{key:"carne_mod",label:"Carnes mod."},{key:"carne_alta",label:"Carnes altas"},{key:"legum",label:"Leguminosas"},{key:"cereal",label:"Cereales"},{key:"verdura",label:"Verduras"},{key:"fruta",label:"Frutas"},{key:"grasa",label:"Grasas"},{key:"acces",label:"Accesorios"}];
+  const EV2={lac_semi:{prot:8,lip:4,hc:12},carne_baja:{prot:7,lip:2,hc:0},carne_mod:{prot:7,lip:5,hc:0},carne_alta:{prot:7,lip:8,hc:0},legum:{prot:7,lip:1,hc:15},cereal:{prot:2,lip:1,hc:15},verdura:{prot:2,lip:0,hc:5},fruta:{prot:0,lip:0,hc:15},grasa:{prot:0,lip:5,hc:0},acces:{prot:0,lip:0,hc:10}};
+  GRP.forEach((g,gi)=>{
+    const ev=EV2[g.key]; if(!ev) return;
+    const n=(exchanges[g.key]?.total)||0;
+    const bg=gi%2===0?[252,253,255]:WHITE; mx=MG;
+    [g.label,String(n),String(n*ev.prot),String(n*ev.lip),String(n*ev.hc)].forEach((v,i)=>{ rc(mx,y,eTW[i],5,bg); sf(7,i===0?"bold":"normal",NAVY); doc.text(v,mx+eTW[i]/2,y+4,{align:"center"}); mx+=eTW[i]; }); y+=5;
+  });
+  rc(MG,y,112,6,BLUE); mx=MG;
+  [{v:"Total",b:true},{v:String(Object.values(exchanges).reduce((s,e)=>s+(e?.total||0),0)),b:true},{v:String(totals.prot),b:false},{v:String(totals.lip),b:false},{v:String(totals.hc),b:false}].forEach((cell,i)=>{ sf(7,cell.b?"bold":"normal",WHITE); doc.text(cell.v,mx+eTW[i]/2,y+4.5,{align:"center"}); mx+=eTW[i]; }); y+=11;
+  doc.setFillColor(...NAVY); doc.rect(0,285,W,12,"F");
+  sf(7,"normal",[147,197,253]);
+  doc.text("nutrionally.com/learn",MG,291);
+  doc.text(isES?"Documento educativo — no apto para uso clínico real":"Educational document — not for clinical use",W/2,291,{align:"center"});
+  doc.text(dateStr,W-MG,291,{align:"right"});
+  const pdfBlob = doc.output("blob");
+  window.open(URL.createObjectURL(pdfBlob), "_blank");
+}
+
 export default function App() {
   const [patient]    = useState(() => ({ ...DEFAULT_PATIENT, ...loadFromStorage("nl_patient_v1", {}) }));
   const [studyMode]  = useState(() => loadFromStorage("nl_study_v1", false));
@@ -455,6 +564,7 @@ export default function App() {
 
               {/* Nature */}
               <NatureCard isES={isES} exchanges={exchanges} totals={totals}/>
+              <EquivPanel isES={isES}/>
 
             </div>
 
@@ -497,14 +607,16 @@ export default function App() {
               {/* PDF buttons */}
               <div style={{display:"flex", flexDirection:"column", gap:8}}>
                 <button
+                  onClick={() => exportPDF(patient, exchanges, totals, isES, false)}
                   style={{padding:"10px 0", borderRadius:8, background:"#EFF6FF", color:"#2563EB", fontSize:12, fontWeight:500, border:"0.5px solid #2563EB", cursor:"pointer", fontFamily:FONT}}
                 >
                   ↓ {isES ? "Descargar PDF" : "Download PDF"}
                 </button>
                 <button
+                  onClick={() => exportPDF(patient, exchanges, totals, isES, true)}
                   style={{padding:"10px 0", borderRadius:8, background: studyMode ? "#F3E8FF" : "#F5F7FF", color: studyMode ? "#7C3AED" : "#3A5BA0", fontSize:12, fontWeight:500, border: studyMode ? "0.5px solid #7C3AED" : "0.5px solid #D4E3FF", cursor:"pointer", fontFamily:FONT}}
                 >
-                  {studyMode ? "◎ PDF Study" : "PDF"}
+                  ◎ PDF Study
                 </button>
               </div>
             </div>
