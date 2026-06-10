@@ -302,6 +302,34 @@ async function exportPDF(patient, exchanges, totals, isES, withStudy) {
   });
   rc(MG,y,112,6,BLUE); mx=MG;
   [{v:"Total",b:true},{v:String(Object.values(exchanges).reduce((s,e)=>s+(e?.total||0),0)),b:true},{v:String(totals.prot),b:false},{v:String(totals.lip),b:false},{v:String(totals.hc),b:false}].forEach((cell,i)=>{ sf(7,cell.b?"bold":"normal",WHITE); doc.text(cell.v,mx+eTW[i]/2,y+4.5,{align:"center"}); mx+=eTW[i]; }); y+=11;
+
+  // ── Meal distribution ──────────────────────────────────────────────────
+  const has5pdf = (patient.mealTimes||4) >= 5;
+  const mealKeysPDF = has5pdf ? ["D","A","C","M","M2"] : ["D","A","C","M"];
+  const mealLblPDF = {D:isES?"Desayuno":"Breakfast",A:isES?"Almuerzo":"Lunch",C:isES?"Cena":"Dinner",M:isES?"Merienda":"Snack",M2:isES?"Merienda 2":"Snack 2"};
+  function getMealKcalPDF(mk) {
+    let k=0;
+    GRP.forEach(g=>{ const ev=EV2[g.key]; if(!ev) return; const n=(exchanges[g.key]?.[mk])||0; k+=n*(ev.prot*4+ev.lip*9+ev.hc*4); });
+    return k;
+  }
+  sf(10,"bold",NAVY); doc.text(isES?"Distribucion por tiempo de comida":"Meal time distribution",MG,y); y+=5;
+  doc.setDrawColor(212,227,255); doc.setLineWidth(0.2); doc.line(MG,y,W-MG,y); y+=3;
+  const totalKcalPDF = totals.prot*4 + totals.lip*9 + totals.hc*4;
+  mealKeysPDF.forEach(mk=>{
+    const kcal = getMealKcalPDF(mk);
+    const pct = totalKcalPDF>0 ? Math.round(kcal/totalKcalPDF*100) : 0;
+    const barW = Math.round((W-2*MG-30) * pct/100);
+    rc(MG,y,W-2*MG-30,6,LIGHT);
+    if(barW>0) rc(MG,y,barW,6,BLUE);
+    sf(7,"normal",NAVY); doc.text(mealLblPDF[mk],MG+2,y+4.5);
+    sf(7,"bold",NAVY); doc.text(`${kcal} kcal (${pct}%)`,W-MG,y+4.5,{align:"right"});
+    y+=8;
+  });
+  rc(MG,y,W-2*MG,6,[37,99,235,50]);
+  sf(7,"bold",NAVY); doc.text(isES?"Total":"Total",MG+2,y+4.5);
+  sf(7,"bold",NAVY); doc.text(`${totalKcalPDF} kcal`,W-MG,y+4.5,{align:"right"});
+  y+=12;
+
   doc.setFillColor(...NAVY); doc.rect(0,285,W,12,"F");
   sf(7,"normal",[147,197,253]);
   doc.text("nutrionally.com/learn",MG,291);
