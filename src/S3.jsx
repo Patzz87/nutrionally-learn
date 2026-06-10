@@ -315,19 +315,21 @@ async function exportPDF(patient, exchanges, totals, isES, withStudy) {
   sf(10,"bold",NAVY); doc.text(isES?"Distribucion por tiempo de comida":"Meal time distribution",MG,y); y+=5;
   doc.setDrawColor(212,227,255); doc.setLineWidth(0.2); doc.line(MG,y,W-MG,y); y+=3;
   const totalKcalPDF = totals.prot*4 + totals.lip*9 + totals.hc*4;
+  const mealColorsPDF = {D:[37,99,235],A:[8,145,178],C:[234,179,8],M:[168,85,247],M2:[34,197,94]};
   mealKeysPDF.forEach(mk=>{
     const kcal = getMealKcalPDF(mk);
     const pct = totalKcalPDF>0 ? Math.round(kcal/totalKcalPDF*100) : 0;
-    const barW = Math.round((W-2*MG-30) * pct/100);
-    rc(MG,y,W-2*MG-30,6,LIGHT);
-    if(barW>0) rc(MG,y,barW,6,BLUE);
-    sf(7,"normal",NAVY); doc.text(mealLblPDF[mk],MG+2,y+4.5);
-    sf(7,"bold",NAVY); doc.text(`${kcal} kcal (${pct}%)`,W-MG,y+4.5,{align:"right"});
-    y+=8;
+    const barW = Math.round((W-2*MG) * pct/100);
+    const clr = mealColorsPDF[mk]||BLUE;
+    rc(MG,y,W-2*MG,7,LIGHT);
+    if(barW>0) rc(MG,y,barW,7,clr);
+    sf(7,"bold",WHITE); doc.text(mealLblPDF[mk],MG+2,y+5);
+    sf(7,"bold",NAVY); doc.text(`${kcal} kcal (${pct}%)`,W-MG,y+5,{align:"right"});
+    y+=9;
   });
-  rc(MG,y,W-2*MG,6,[37,99,235,50]);
-  sf(7,"bold",NAVY); doc.text(isES?"Total":"Total",MG+2,y+4.5);
-  sf(7,"bold",NAVY); doc.text(`${totalKcalPDF} kcal`,W-MG,y+4.5,{align:"right"});
+  rc(MG,y,W-2*MG,7,NAVY);
+  sf(7,"bold",WHITE); doc.text(isES?"Total":"Total",MG+2,y+5);
+  sf(7,"bold",WHITE); doc.text(`${totalKcalPDF} kcal`,W-MG,y+5,{align:"right"});
   y+=12;
 
   doc.setFillColor(...NAVY); doc.rect(0,285,W,12,"F");
