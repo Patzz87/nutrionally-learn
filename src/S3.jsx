@@ -1,4 +1,4 @@
-import { useState, useMemo, createContext, useContext } from "react";
+import React, { useState, useMemo, createContext, useContext } from "react";
 
 const StudyCtx = createContext({ studyMode: false });
 const FONT = "Plus Jakarta Sans, sans-serif";
@@ -198,6 +198,51 @@ function AlertBox({ level, badge, explain, studyMode }) {
           </p>
         )}
       </div>
+    </div>
+  );
+}
+
+function EquivPanel({isES}) {
+  const [open, setOpen] = React.useState(false);
+  const rows = [
+    {g:isES?"Lacteos semidescremados":"Semi-skimmed dairy", prot:8, lip:4, hc:12, por:isES?"240 ml":"240 ml"},
+    {g:isES?"Carnes bajas en grasa":"Lean meats", prot:7, lip:2, hc:0, por:isES?"90 g":"90 g"},
+    {g:isES?"Carnes moderadas":"Medium-fat meats", prot:7, lip:5, hc:0, por:isES?"90 g":"90 g"},
+    {g:isES?"Carnes altas en grasa":"High-fat meats", prot:7, lip:8, hc:0, por:isES?"90 g":"90 g"},
+    {g:isES?"Leguminosas":"Legumes", prot:7, lip:1, hc:15, por:isES?"1/2 taza":"1/2 cup"},
+    {g:isES?"Cereales":"Cereals", prot:2, lip:1, hc:15, por:isES?"varía":"varies"},
+    {g:isES?"Verduras":"Vegetables", prot:2, lip:0, hc:5, por:isES?"1/2 taza":"1/2 cup"},
+    {g:isES?"Frutas":"Fruits", prot:0, lip:0, hc:15, por:isES?"varía":"varies"},
+    {g:isES?"Grasas":"Fats", prot:0, lip:5, hc:0, por:isES?"1 cdita":"1 tsp"},
+    {g:isES?"Accesorios":"Accessories", prot:0, lip:0, hc:10, por:isES?"varía":"varies"},
+  ];
+  return (
+    <div style={{background:"#fff",border:"0.5px solid #D4E3FF",borderRadius:12,overflow:"hidden"}}>
+      <div onClick={()=>setOpen(!open)} style={{padding:"12px 16px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:open?"0.5px solid #D4E3FF":"none"}}>
+        <span style={{fontSize:13,fontWeight:500,color:"#1E2D4E",fontFamily:FONT}}>{isES?"Equivalencias de alimentos":"Food equivalencies"}</span>
+        <span style={{fontSize:14,color:"#3A5BA0"}}>{open?"▲":"▼"}</span>
+      </div>
+      {open async function exportPDFasync function exportPDF (
+        <div style={{overflowX:"auto"}}>
+          <table style={{width:"100%",borderCollapse:"collapse",fontFamily:FONT}}>
+            <thead><tr style={{background:"#F5F7FF"}}>
+              {[isES?"Grupo":"Group",isES?"Porcion":"Portion","Prot",isES?"Lip":"Fat","HC"].map((h,i)=><th key={i} style={{padding:"7px 12px",fontSize:10,fontWeight:500,color:"#3A5BA0",textTransform:"uppercase",letterSpacing:"0.05em",borderBottom:"0.5px solid #D4E3FF",textAlign:i===0?"left":"center"}}>{h}</th>)}
+            </tr></thead>
+            <tbody>
+              {rows.map((r,i)=>(
+                <tr key={i} style={{borderBottom:"0.5px solid #F0F4FF",background:i%2===0?"#fff":"#F9FBFF"}}>
+                  <td style={{padding:"7px 12px",fontSize:12,color:"#1E2D4E",fontWeight:500}}>{r.g}</td>
+                  <td style={{padding:"7px 12px",fontSize:11,color:"#3A5BA0",textAlign:"center"}}>{r.por}</td>
+                  <td style={{padding:"7px 12px",textAlign:"center"}}><span style={{display:"inline-block",padding:"2px 8px",borderRadius:20,fontSize:11,fontWeight:600,background:"#EFF6FF",color:"#2563EB"}}>{r.prot}</span></td>
+                  <td style={{padding:"7px 12px",textAlign:"center"}}><span style={{display:"inline-block",padding:"2px 8px",borderRadius:20,fontSize:11,fontWeight:600,background:"#FAEEDA",color:"#854F0B"}}>{r.lip}</span></td>
+                  <td style={{padding:"7px 12px",textAlign:"center"}}><span style={{display:"inline-block",padding:"2px 8px",borderRadius:20,fontSize:11,fontWeight:600,background:"#D4E3FF",color:"#0C447C"}}>{r.hc}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div style={{padding:"8px 16px",background:"#F5F7FF",fontSize:10,color:"#3A5BA0",fontFamily:FONT}}>Valores por 1 intercambio · INCAP / USDA</div>
+        </div>
+      )}
     </div>
   );
 }
@@ -515,6 +560,7 @@ export default function App() {
 
               {/* Nature */}
               <NatureCard isES={isES} exchanges={exchanges} totals={totals}/>
+              <EquivPanel isES={isES}/>
 
             </div>
 
