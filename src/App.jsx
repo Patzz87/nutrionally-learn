@@ -143,7 +143,7 @@ function Navbar({lang,setLang,screen,setScreen,isMobile}) {
         <div style={{width:8,height:8,borderRadius:"50%",background:"#2563EB"}}/>
         <span style={{fontSize:15,fontWeight:600,color:"#E2E8F0",fontFamily:F}}>nutrionally <span style={{fontWeight:400,color:"#93C5FD",fontSize:13}}>learn</span></span>
       </button>
-      {!isMobile&&[{id:"s1",label:{ES:"Calculadora",EN:"Calculator"}},{id:"s4",label:{ES:"Equivalencias de alimentos",EN:"Food equivalencies"}}].map(item=>(
+      {!isMobile&&[{id:"s1",label:{ES:"Calculadora",EN:"Calculator"}},{id:"s4",label:{ES:"Lista de alimentos",EN:"Food list"}}].map(item=>(
         <button key={item.id} onClick={()=>setScreen(item.id)} style={{fontSize:13,fontFamily:F,background:"none",border:"none",cursor:"pointer",color:screen===item.id?"#93C5FD":"#8B949E",fontWeight:screen===item.id?500:400,borderBottom:screen===item.id?"2px solid #2563EB":"2px solid transparent",paddingBottom:2,flexShrink:0}}>{item.label[lang]}</button>
       ))}
       <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:10}}>
@@ -747,7 +747,7 @@ function Screen3Wrapper({lang, state, setState, setScreen, isMobile, studyMode})
             );})}
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:8}}>
-            <button onClick={()=>setScreen("s2")} style={{padding:"9px 0",borderRadius:8,background:"transparent",color:"#3A5BA0",fontSize:12,fontWeight:500,border:"0.5px solid #D4E3FF",cursor:"pointer",fontFamily:F}}>
+            <button onClick={()=>window.location.href="/"} style={{padding:"9px 0",borderRadius:8,background:"transparent",color:"#3A5BA0",fontSize:12,fontWeight:500,border:"0.5px solid #D4E3FF",cursor:"pointer",fontFamily:F}}>
               {isES?"← Macronutrientes":"← Macronutrients"}
             </button>
           </div>
@@ -771,7 +771,25 @@ function Screen4({lang,isMobile}) {
   const filtered=useMemo(()=>FOODS.filter(f=>{const name=lang==="ES"?f.es:f.en;return name.toLowerCase().includes(search.toLowerCase())&&(activeCat==="all"||f.cat===activeCat)&&matchF(f,activeF);}),[search,activeCat,activeF,lang]);
   const grouped=useMemo(()=>{const m={};filtered.forEach(f=>{if(!m[f.cat])m[f.cat]=[];m[f.cat].push(f);});return m;},[filtered]);
 
-  function handleAdd(food){setAdded(p=>({...p,[food.id]:true}));setToast(lang==="ES"?food.es:food.en);setTimeout(()=>setToast(null),2200);}
+  const CAT_TO_KEY = {
+    lacteos:"lac_semi", carnes_bajas:"carne_baja", carnes_mod:"carne_mod",
+    carnes_altas:"carne_alta", leguminosas:"legum", cereales:"cereal",
+    verduras:"verdura", frutas:"fruta", grasas:"grasa", accesorios:"acces",
+  };
+  function handleAdd(food){
+    setAdded(p=>({...p,[food.id]:true}));
+    setToast(lang==="ES"?food.es:food.en);
+    setTimeout(()=>setToast(null),2200);
+    try {
+      const key = CAT_TO_KEY[food.cat];
+      if (!key) return;
+      const saved = localStorage.getItem("nl_exc_v1");
+      const exc = saved ? JSON.parse(saved) : null;
+      if (!exc || !exc[key]) return;
+      exc[key].total = (exc[key].total||0) + 1;
+      localStorage.setItem("nl_exc_v1", JSON.stringify(exc));
+    } catch {}
+  }
 
   const LS={fontSize:10,fontWeight:500,color:"#3A5BA0",textTransform:"uppercase",letterSpacing:"0.05em",fontFamily:F};
 
