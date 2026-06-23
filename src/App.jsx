@@ -1,3 +1,4 @@
+import UpgradeModal from "./UpgradeModal.jsx";
 import { useState, useEffect, useMemo, createContext, useContext } from "react";
 
 const StudyModeContext = createContext({ studyMode: false, setStudyMode: () => {} });
@@ -135,7 +136,7 @@ function hamwi(sex,heightIn) {
   return +(48.0+2.7*(heightIn-60)).toFixed(1);
 }
 
-function Navbar({lang,setLang,screen,setScreen,isMobile}) {
+function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade}) {
   const {studyMode,setStudyMode} = useContext(StudyModeContext);
   return (
     <nav style={{background:"#1E2D4E",height:52,display:"flex",alignItems:"center",padding:"0 20px",gap:20,borderBottom:"0.5px solid #2D4270",position:"sticky",top:0,zIndex:200,flexShrink:0}}>
@@ -164,7 +165,7 @@ function Navbar({lang,setLang,screen,setScreen,isMobile}) {
             <button key={l} onClick={()=>setLang(l)} style={{padding:"5px 10px",fontSize:12,fontWeight:500,cursor:"pointer",background:lang===l?"#2563EB":"transparent",color:lang===l?"#fff":"#93C5FD",border:"none",fontFamily:F}}>{l}</button>
           ))}
         </div>
-        <span style={{fontSize:11,fontWeight:600,padding:"5px 12px",background:"#2563EB",color:"#fff",borderRadius:6,cursor:"pointer",fontFamily:F,flexShrink:0}}>Pro</span>
+        <span onClick={onUpgrade} style={{fontSize:11,fontWeight:600,padding:"5px 12px",background:"#2563EB",color:"#fff",borderRadius:6,cursor:"pointer",fontFamily:F,flexShrink:0}}>Pro u2197</span>
       </div>
     </nav>
   );
@@ -889,6 +890,7 @@ export default function App() {
   const [lang,setLang]=useState("ES");
   const [screen,setScreen]=useState("s1");
   const [isMobile,setIsMobile]=useState(false);
+  const [showUpgrade,setShowUpgrade]=useState(false);
   const [studyMode,setStudyModeRaw]=useState(()=>loadLS(LS_KEY_STUDY,false));
   const [patientState,setPatientStateRaw]=useState(()=>loadLS(LS_KEY_PATIENT,DEFAULT_PATIENT));
 
@@ -903,7 +905,7 @@ export default function App() {
     <StudyModeContext.Provider value={{studyMode,setStudyMode}}>
       <div style={{fontFamily:F,background:"#F5F7FF",minHeight:"100vh",display:"flex",flexDirection:"column"}}>
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
-        <Navbar lang={lang} setLang={setLang} screen={screen} setScreen={setScreen} isMobile={isMobile}/>
+        <Navbar lang={lang} setLang={setLang} screen={screen} setScreen={setScreen} isMobile={isMobile} onUpgrade={()=>setShowUpgrade(true)}/>
         {studyMode&&(
           <div style={{background:"#1E1040",borderBottom:"1px solid #7C3AED",padding:"8px 20px",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
             <span style={{fontSize:13}}>◎</span>
@@ -919,6 +921,7 @@ export default function App() {
           {screen==="s4"&&<Screen4 lang={lang} isMobile={isMobile}/>}
         </div>
       </div>
+    {showUpgrade&&<UpgradeModal isES={lang==="ES"} onClose={()=>setShowUpgrade(false)}/>}
     </StudyModeContext.Provider>
   );
 }
