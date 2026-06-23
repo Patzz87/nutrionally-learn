@@ -136,7 +136,7 @@ function hamwi(sex,heightIn) {
   return +(48.0+2.7*(heightIn-60)).toFixed(1);
 }
 
-function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade}) {
+function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade,setCaseStarted}) {
   const {studyMode,setStudyMode} = useContext(StudyModeContext);
   return (
     <nav style={{background:"#1E2D4E",height:52,display:"flex",alignItems:"center",padding:"0 20px",gap:20,borderBottom:"0.5px solid #2D4270",position:"sticky",top:0,zIndex:200,flexShrink:0}}>
@@ -908,7 +908,7 @@ export default function App() {
     <StudyModeContext.Provider value={{studyMode,setStudyMode}}>
       <div style={{fontFamily:F,background:"#F5F7FF",minHeight:"100vh",display:"flex",flexDirection:"column"}}>
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
-        <Navbar lang={lang} setLang={setLang} screen={screen} setScreen={setScreen} isMobile={isMobile} onUpgrade={()=>setShowUpgrade(true)}/>
+        <Navbar lang={lang} setLang={setLang} screen={screen} setScreen={setScreen} isMobile={isMobile} onUpgrade={()=>setShowUpgrade(true)} setCaseStarted={setCaseStarted}/>
         {studyMode&&(
           <div style={{background:"#1E1040",borderBottom:"1px solid #7C3AED",padding:"8px 20px",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
             <span style={{fontSize:13}}>◎</span>
