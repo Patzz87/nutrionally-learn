@@ -348,7 +348,7 @@ function Screen1({lang,state,setState,setScreen,isMobile}) {
             </div>
           </div>
           {isMobile&&<div style={{marginTop:14}}><ResultsPanel/></div>}
-          <button onClick={()=>{const c=loadLS("nl_case_count_v1",0);if(c>=FREE_LIMIT){setShowUpgrade(true);}else{const n=c+1;try{localStorage.setItem("nl_case_count_v1",JSON.stringify(n));}catch{}setCaseCount(n);setScreen("s2");}}} style={{marginTop:14,width:"100%",padding:"13px 0",borderRadius:8,background:"#2563EB",color:"#fff",fontSize:14,fontWeight:500,border:"none",cursor:"pointer",fontFamily:F}}>{t.next}</button>
+          <button onClick={()=>{if(caseStarted){setScreen("s2");return;}const c=loadLS("nl_case_count_v1",0);if(c>=FREE_LIMIT){setShowUpgrade(true);}else{const n=c+1;try{localStorage.setItem("nl_case_count_v1",JSON.stringify(n));}catch{}setCaseCount(n);setCaseStarted(true);setScreen("s2");}}}} style={{marginTop:14,width:"100%",padding:"13px 0",borderRadius:8,background:"#2563EB",color:"#fff",fontSize:14,fontWeight:500,border:"none",cursor:"pointer",fontFamily:F}}>{t.next}</button>
         </div>
         {!isMobile&&<ResultsPanel/>}
       </div>
