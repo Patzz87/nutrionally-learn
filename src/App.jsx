@@ -194,7 +194,7 @@ const T1={
   EN:{title:"Case data",subtitle:"Enter patient data. Everything calculates in real time.",caseName:"Case name",caseNamePH:"E.g. Patient A — Case 3",sex:"Biological sex",female:"Female",male:"Male",weight:"Weight",height:"Height",age:"Age",waist:"Waist",years:"years",goal:"Weight goal",goals:[{key:"bajar",label:"Lose weight",kcal:"20 Kcal/kg",icon:"↓"},{key:"mantener",label:"Maintain weight",kcal:"24 Kcal/kg",icon:"→"},{key:"subir",label:"Gain weight",kcal:"28 Kcal/kg",icon:"↑"}],activity:"Activity level",activities:["Sedentary","Lightly active","Active","Very active"],condition:"Health condition (optional)",condOpts:[{key:"none",label:"None",disabled:false},{key:"dm2",label:"Type 2 Diabetes",disabled:false},{key:"obesity",label:"Obesity",disabled:false},{key:"ped",label:"Pediatric",disabled:true}],condNote:{dm2:"T2D: CHO adjusted to 47% · 5 meal times (ADA 2024)",obesity:"Obesity: Ideal Body Weight calculated using Hamwi formula"},idealWeight:"Ideal weight (Hamwi)",results:"Results",bmi:"BMI",bmiS:{bajo:"Underweight",normal:"Normal",sobre:"Overweight",obeso:"Obese"},geb:"BMR (Basal metabolic rate)",vet:"TDEE (Total daily energy)",kcalKg:"Assigned Kcal/kg",kcalDay:"kcal/day",next:"View macronutrients →",calc:"Calculated automatically",formula:"Harris-Benedict"},
 };
 
-function Screen1({lang,state,setState,setScreen,isMobile}) {
+function Screen1({lang,state,setState,setScreen,isMobile,caseStarted,setCaseStarted,FREE_LIMIT,setCaseCount,setShowUpgrade}) {
   const t=T1[lang];
   const {caseName,sex,weightLb,heightIn,age,waist,goal,activity,condition="none"}=state;
   const wkg=+(weightLb*0.4536).toFixed(1);
@@ -918,7 +918,7 @@ export default function App() {
         )}
         {isCalcScreen&&<StepPills lang={lang} current={screen} setScreen={setScreen}/>}
         <div style={{flex:1,overflowY:screen==="s4"?"hidden":"auto",display:"flex",flexDirection:"column"}}>
-          {screen==="s1"&&<Screen1 lang={lang} state={patientState} setState={setPatientState} setScreen={setScreen} isMobile={isMobile}/>}
+          {screen==="s1"&&<Screen1 lang={lang} state={patientState} setState={setPatientState} setScreen={setScreen} isMobile={isMobile} caseStarted={caseStarted} setCaseStarted={setCaseStarted} FREE_LIMIT={FREE_LIMIT} setCaseCount={setCaseCount} setShowUpgrade={setShowUpgrade}/>}
           {screen==="s2"&&<Screen2 lang={lang} state={patientState} setState={setPatientState} setScreen={setScreen} isMobile={isMobile}/>}
           {screen==="s3"&&<Screen3Wrapper lang={lang} state={patientState} setScreen={setScreen} studyMode={studyMode}/>}
           {screen==="s4"&&<Screen4 lang={lang} isMobile={isMobile}/>}
