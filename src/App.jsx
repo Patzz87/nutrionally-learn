@@ -923,7 +923,7 @@ export default function App() {
           {screen==="s4"&&<Screen4 lang={lang} isMobile={isMobile}/>}
         </div>
       </div>
-    {showUpgrade&&<UpgradeModal isES={lang==="ES"} onClose={()=>setShowUpgrade(false)}/>}
+    {showUpgrade&&<UpgradeModal isES={lang==="ES"} onClose={()=>setShowUpgrade(false)} caseCount={caseCount} freeLimit={FREE_LIMIT}/>}
     </StudyModeContext.Provider>
   );
 }

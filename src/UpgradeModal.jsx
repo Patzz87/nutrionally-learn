@@ -2,7 +2,10 @@ const MONTHLY_URL = "https://nutrionally.lemonsqueezy.com/checkout/buy/c51e1318-
 const LIFETIME_URL = "https://nutrionally.lemonsqueezy.com/checkout/buy/807fc3f2-9f9c-4417-bb99-38ef801a5f0e";
 const FONT = "Plus Jakarta Sans, sans-serif";
 
-export default function UpgradeModal({ isES, onClose }) {
+export default function UpgradeModal({ isES, onClose, caseCount, freeLimit }) {
+  const count = caseCount || 0;
+  const limit = freeLimit || 6;
+
   return (
     <div
       onClick={onClose}
@@ -15,11 +18,11 @@ export default function UpgradeModal({ isES, onClose }) {
         onClick={e => e.stopPropagation()}
         style={{
           background:"#fff", borderRadius:16, padding:"32px 28px", maxWidth:420, width:"100%",
-          fontFamily:FONT, boxShadow:"0 20px 60px rgba(0,0,0,0.15)",
+          fontFamily:FONT,
         }}
       >
         {/* Header */}
-        <div style={{textAlign:"center", marginBottom:24}}>
+        <div style={{textAlign:"center", marginBottom:20}}>
           <div style={{display:"flex", alignItems:"center", justifyContent:"center", gap:8, marginBottom:8}}>
             <div style={{width:8, height:8, borderRadius:"50%", background:"#2563EB"}}/>
             <span style={{fontSize:15, fontWeight:600, color:"#1E2D4E"}}>nutrionally</span>
@@ -33,6 +36,24 @@ export default function UpgradeModal({ isES, onClose }) {
               ? "Calcula casos ilimitados, exporta PDF con estudio y accede a todos los módulos clínicos."
               : "Calculate unlimited cases, export study PDFs, and access all clinical modules."}
           </p>
+        </div>
+
+        {/* Case count indicator */}
+        <div style={{
+          background:"#FEF9E7", border:"0.5px solid #e8d89a", borderRadius:8,
+          padding:"10px 14px", marginBottom:20, display:"flex", alignItems:"center", gap:10,
+        }}>
+          <div style={{flex:1}}>
+            <div style={{fontSize:11, color:"#7D3C98", fontWeight:500, marginBottom:4}}>
+              {isES ? `Casos gratuitos usados` : `Free cases used`}
+            </div>
+            <div style={{height:6, background:"#D4E3FF", borderRadius:3, overflow:"hidden"}}>
+              <div style={{height:"100%", width:`${Math.min(count/limit*100,100)}%`, background:"#2563EB", borderRadius:3}}/>
+            </div>
+          </div>
+          <div style={{fontSize:14, fontWeight:600, color:"#1E2D4E", minWidth:40, textAlign:"right"}}>
+            {count}/{limit}
+          </div>
         </div>
 
         {/* Features */}
@@ -53,16 +74,13 @@ export default function UpgradeModal({ isES, onClose }) {
 
         {/* Pricing options */}
         <div style={{display:"flex", flexDirection:"column", gap:10, marginBottom:16}}>
-
-          {/* Monthly */}
           <a
             href={MONTHLY_URL}
             target="_blank"
             rel="noopener noreferrer"
             style={{
               display:"block", padding:"14px 18px", borderRadius:10,
-              background:"#2563EB", color:"#fff", textDecoration:"none",
-              textAlign:"center",
+              background:"#2563EB", color:"#fff", textDecoration:"none", textAlign:"center",
             }}
           >
             <div style={{fontSize:14, fontWeight:600, marginBottom:2}}>
@@ -73,7 +91,6 @@ export default function UpgradeModal({ isES, onClose }) {
             </div>
           </a>
 
-          {/* Lifetime */}
           <a
             href={LIFETIME_URL}
             target="_blank"
