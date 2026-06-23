@@ -140,7 +140,7 @@ function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade}) {
   const {studyMode,setStudyMode} = useContext(StudyModeContext);
   return (
     <nav style={{background:"#1E2D4E",height:52,display:"flex",alignItems:"center",padding:"0 20px",gap:20,borderBottom:"0.5px solid #2D4270",position:"sticky",top:0,zIndex:200,flexShrink:0}}>
-      <button onClick={()=>setScreen("s1")} style={{display:"flex",alignItems:"center",gap:8,background:"none",border:"none",cursor:"pointer",padding:0,flexShrink:0}}>
+      <button onClick={()=>{setScreen("s1");setCaseStarted(false);}} style={{display:"flex",alignItems:"center",gap:8,background:"none",border:"none",cursor:"pointer",padding:0,flexShrink:0}}>
         <div style={{width:8,height:8,borderRadius:"50%",background:"#2563EB"}}/>
         <span style={{fontSize:15,fontWeight:600,color:"#E2E8F0",fontFamily:F}}>nutrionally <span style={{fontWeight:400,color:"#93C5FD",fontSize:13}}>learn</span></span>
       </button>
@@ -893,6 +893,7 @@ export default function App() {
   const [showUpgrade,setShowUpgrade]=useState(false);
   const FREE_LIMIT=6;
   const [caseCount,setCaseCount]=useState(()=>loadLS("nl_case_count_v1",0));
+  const [caseStarted,setCaseStarted]=useState(false);
   const [studyMode,setStudyModeRaw]=useState(()=>loadLS(LS_KEY_STUDY,false));
   const [patientState,setPatientStateRaw]=useState(()=>loadLS(LS_KEY_PATIENT,DEFAULT_PATIENT));
 
