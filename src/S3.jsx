@@ -256,12 +256,17 @@ function exportPDF(patient, exchanges, totals, isES, withStudy) {
   const doc = new jsPDF({unit:"mm", format:"a4"});
   const W=210, MG=14; let y=14;
   const NAVY=[30,45,78], BLUE=[37,99,235], WHITE=[255,255,255], GRAY=[90,100,120], LIGHT=[245,247,255];
+  const PURPLE=[124,58,237], PURPLE_LIGHT=[245,240,255], PURPLE_MID=[76,29,149];
+  const GREEN=[22,163,74], GREEN_LIGHT=[240,253,244];
+  const ORANGE=[180,83,9], ORANGE_LIGHT=[255,251,235];
   const sf = (sz,st,col) => { doc.setFontSize(sz); doc.setFont("helvetica",st||"normal"); doc.setTextColor(...(col||NAVY)); };
   const rc = (x,yy,w,h,fill) => { doc.setFillColor(...fill); doc.setDrawColor(...fill); doc.roundedRect(x,yy,w,h,1,1,"F"); };
   const wkg = +(patient.weightLb*0.4536).toFixed(1);
   const hcm2 = +(patient.heightIn*2.54).toFixed(1);
   const vet = patient.vet||1582;
-  const geb = Math.round(patient.sex==="F"?(655+9.6*wkg+1.9*hcm2-4.7*patient.age):(66+13.8*wkg+5*hcm2-6.8*patient.age));
+  const isF = patient.sex==="F";
+  const geb = Math.round(isF?(655+9.6*wkg+1.9*hcm2-4.7*patient.age):(66+13.8*wkg+5*hcm2-6.8*patient.age));
+  const kcalPerKg = {bajar:20,mantener:24,subir:28}[patient.goal||"mantener"];
   const dateStr = new Date().toLocaleDateString(isES?"es-ES":"en-US",{year:"numeric",month:"short",day:"numeric"});
 
   doc.setFillColor(...NAVY); doc.rect(0,0,W,22,"F");
@@ -271,20 +276,78 @@ function exportPDF(patient, exchanges, totals, isES, withStudy) {
   doc.text(dateStr,W-MG,19,{align:"right"}); y=30;
 
   rc(MG,y,W-2*MG,13,LIGHT);
-  [{l:"Caso",v:patient.caseName||"—"},{l:"Sexo",v:patient.sex==="F"?"F":"M"},{l:"Peso",v:wkg+"kg"},{l:"VET",v:vet+"kcal"},{l:"Cond.",v:patient.condition==="dm2"?"DM2":patient.condition==="obesity"?"Obeso":"Normal"}].forEach((inf,i)=>{
-    const x=MG+i*(W-2*MG)/5+1; sf(7,"normal",GRAY); doc.text(inf.l.toUpperCase(),x,y+4); sf(8,"bold",NAVY); doc.text(String(inf.v),x,y+10);
+  [{l:isES?"Caso":"Case",v:patient.caseName||"—"},{l:isES?"Sexo":"Sex",v:patient.sex==="F"?(isES?"Fem":"F"):(isES?"Masc":"M")},{l:isES?"Peso":"Weight",v:wkg+"kg"},{l:isES?"Talla":"Height",v:hcm2+"cm"},{l:"VET",v:vet+"kcal"},{l:isES?"Cond.":"Cond.",v:patient.condition==="dm2"?"DM2":patient.condition==="obesity"?(isES?"Obeso":"Obese"):(isES?"Normal":"Normal")}].forEach((inf,i)=>{
+    const x=MG+i*(W-2*MG)/6+1; sf(7,"normal",GRAY); doc.text(inf.l.toUpperCase(),x,y+4); sf(8,"bold",NAVY); doc.text(String(inf.v),x,y+10);
   }); y+=19;
 
+  // ── HARRIS-BENEDICT SECTION (always shown) ──────────────────────────────
+  sf(9,"bold",NAVY); doc.text(isES?"Calculo del Gasto Energetico Basal (GEB)":"Basal Energy Expenditure (BEE) Calculation",MG,y); y+=4;
+  doc.setDrawColor(...BLUE); doc.setLineWidth(0.3); doc.line(MG,y,W-MG,y); y+=5;
+
+  // Step 1 box — formula generic
+  rc(MG,y,W-2*MG,9,LIGHT);
+  sf(7,"bold",NAVY); doc.text(isES?"Paso 1 — Formula Harris-Benedict (1919)":"Step 1 — Harris-Benedict Formula (1919)",MG+2,y+3.5);
+  sf(7,"normal",GRAY);
+  const genericFormula = isF
+    ? (isES?"GEB (mujer) = 655 + (9.6 x kg) + (1.9 x cm) - (4.7 x edad)":"BEE (female) = 655 + (9.6 x kg) + (1.9 x cm) - (4.7 x age)")
+    : (isES?"GEB (hombre) = 66 + (13.8 x kg) + (5 x cm) - (6.8 x edad)":"BEE (male) = 66 + (13.8 x kg) + (5 x cm) - (6.8 x age)");
+  doc.text(genericFormula,MG+2,y+7.5);
+  y+=12;
+
+  // Step 2 box — substituting values
+  rc(MG,y,W-2*MG,11,PURPLE_LIGHT);
+  sf(7,"bold",PURPLE_MID); doc.text(isES?"Paso 2 — Sustituyendo valores del paciente":"Step 2 — Substituting patient values",MG+2,y+4);
+  sf(7,"normal",PURPLE_MID);
+  const step2line = isF
+    ? (isES
+        ? `GEB = 655 + (9.6 x ${wkg}) + (1.9 x ${hcm2}) - (4.7 x ${patient.age})`
+        : `BEE = 655 + (9.6 x ${wkg}) + (1.9 x ${hcm2}) - (4.7 x ${patient.age})`)
+    : (isES
+        ? `GEB = 66 + (13.8 x ${wkg}) + (5 x ${hcm2}) - (6.8 x ${patient.age})`
+        : `BEE = 66 + (13.8 x ${wkg}) + (5 x ${hcm2}) - (6.8 x ${patient.age})`);
+  doc.text(step2line,MG+2,y+8.5);
+  y+=14;
+
+  // Step 3 box — arithmetic breakdown
+  rc(MG,y,W-2*MG,13,PURPLE_LIGHT);
+  sf(7,"bold",PURPLE_MID); doc.text(isES?"Paso 3 — Operaciones":"Step 3 — Arithmetic",MG+2,y+4);
+  sf(7,"normal",PURPLE_MID);
+  const t1 = isF ? 655 : 66;
+  const t2 = +(9.6*wkg).toFixed(1); const t2m = isF ? 9.6 : 13.8; const t2v = +(t2m*wkg).toFixed(1);
+  const t3m = isF ? 1.9 : 5.0;   const t3v = +(t3m*hcm2).toFixed(1);
+  const t4m = isF ? 4.7 : 6.8;   const t4v = +(t4m*patient.age).toFixed(1);
+  const arith = isF
+    ? `${t1} + ${t2v} + ${t3v} - ${t4v} = ${geb} kcal/dia`
+    : `${t1} + ${t2v} + ${t3v} - ${t4v} = ${geb} kcal/dia`;
+  doc.text(arith,MG+2,y+8.5);
+  y+=16;
+
+  // Step 4 box — VET calculation
+  rc(MG,y,W-2*MG,13,GREEN_LIGHT);
+  sf(7,"bold",GREEN); doc.text(isES?"Paso 4 — Calculo del VET (Valor Energetico Total)":"Step 4 — TDEE (Total Daily Energy Expenditure)",MG+2,y+4);
+  sf(7,"normal",[21,128,61]);
+  const goalLabel = isES
+    ? (patient.goal==="bajar"?"bajar peso":patient.goal==="subir"?"subir peso":"mantener peso")
+    : (patient.goal==="bajar"?"weight loss":patient.goal==="subir"?"weight gain":"weight maintenance");
+  doc.text(`VET = ${kcalPerKg} kcal/kg  x  ${wkg} kg  =  ${vet} kcal/dia`,MG+2,y+8.5);
+  sf(7,"normal",GRAY); doc.text(`(${kcalPerKg} kcal/kg ${isES?"asignado por objetivo:":"assigned for:"} ${goalLabel})`,MG+2,y+12.5);
+  y+=16;
+
+  // Adequacy note box
+  const adecNote = isES
+    ? "Rango optimo de adecuacion: 90-110%. < 75% indica deficit moderado; < 60% deficit severo."
+    : "Optimal adequacy range: 90-110%. < 75% indicates moderate deficit; < 60% severe deficit.";
+  rc(MG,y,W-2*MG,8,ORANGE_LIGHT);
+  sf(6.5,"normal",ORANGE); doc.text(isES?"Nota clinica:":"Clinical note:",MG+2,y+5);
+  sf(6.5,"normal",[120,53,15]); doc.text(adecNote,MG+22,y+5);
+  y+=12;
+
   if (withStudy) {
-    sf(9,"bold",[124,58,237]); doc.text(isES?"Harris-Benedict (valores del caso)":"Harris-Benedict (case values)",MG,y); y+=4;
-    doc.setDrawColor(209,196,252); doc.setLineWidth(0.2); doc.line(MG,y,W-MG,y); y+=4;
-    const formula = patient.sex==="F"
-      ? `GEB=655+(9.6x${wkg})+(1.9x${hcm2})-(4.7x${patient.age})=${geb}kcal`
-      : `GEB=66+(13.8x${wkg})+(5x${hcm2})-(6.8x${patient.age})=${geb}kcal`;
-    rc(MG,y,W-2*MG,13,[245,240,255]); sf(7,"normal",[76,29,149]);
-    doc.text(formula,MG+2,y+5);
-    doc.text(`VET=${({bajar:20,mantener:24,subir:28}[patient.goal||"mantener"])}kcal/kg x ${wkg}kg=${vet}kcal`,MG+2,y+10);
-    y+=18;
+    rc(MG,y,W-2*MG,8,[237,233,254]);
+    sf(7,"bold",PURPLE); doc.text(isES?"[SM] Study Mode — Referencia":"[SM] Study Mode — Reference",MG+2,y+3.5);
+    sf(6.5,"normal",PURPLE_MID);
+    doc.text(isES?"Harris-Benedict, 1919. Rev. Mifflin-St Jeor, 1990. Factor actividad: sedentario=1.2, ligero=1.375, activo=1.55, muy activo=1.725":"Harris-Benedict, 1919. Rev. Mifflin-St Jeor, 1990. Activity factor: sedentary=1.2, light=1.375, active=1.55, very active=1.725",MG+2,y+7);
+    y+=12;
   }
 
   sf(10,"bold",NAVY); doc.text(isES?"Plan de Intercambios":"Exchange Plan",MG,y); y+=5;
