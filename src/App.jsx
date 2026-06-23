@@ -348,7 +348,7 @@ function Screen1({lang,state,setState,setScreen,isMobile}) {
             </div>
           </div>
           {isMobile&&<div style={{marginTop:14}}><ResultsPanel/></div>}
-          <button onClick={()=>setScreen("s2")} style={{marginTop:14,width:"100%",padding:"13px 0",borderRadius:8,background:"#2563EB",color:"#fff",fontSize:14,fontWeight:500,border:"none",cursor:"pointer",fontFamily:F}}>{t.next}</button>
+          <button onClick={()=>{const c=loadLS("nl_case_count_v1",0);if(c>=FREE_LIMIT){setShowUpgrade(true);}else{const n=c+1;try{localStorage.setItem("nl_case_count_v1",JSON.stringify(n));}catch{}setCaseCount(n);setScreen("s2");}}} style={{marginTop:14,width:"100%",padding:"13px 0",borderRadius:8,background:"#2563EB",color:"#fff",fontSize:14,fontWeight:500,border:"none",cursor:"pointer",fontFamily:F}}>{t.next}</button>
         </div>
         {!isMobile&&<ResultsPanel/>}
       </div>
@@ -891,6 +891,8 @@ export default function App() {
   const [screen,setScreen]=useState("s1");
   const [isMobile,setIsMobile]=useState(false);
   const [showUpgrade,setShowUpgrade]=useState(false);
+  const FREE_LIMIT=6;
+  const [caseCount,setCaseCount]=useState(()=>loadLS("nl_case_count_v1",0));
   const [studyMode,setStudyModeRaw]=useState(()=>loadLS(LS_KEY_STUDY,false));
   const [patientState,setPatientStateRaw]=useState(()=>loadLS(LS_KEY_PATIENT,DEFAULT_PATIENT));
 
