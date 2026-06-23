@@ -165,7 +165,7 @@ function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade}) {
             <button key={l} onClick={()=>setLang(l)} style={{padding:"5px 10px",fontSize:12,fontWeight:500,cursor:"pointer",background:lang===l?"#2563EB":"transparent",color:lang===l?"#fff":"#93C5FD",border:"none",fontFamily:F}}>{l}</button>
           ))}
         </div>
-        <span onClick={onUpgrade} style={{fontSize:11,fontWeight:600,padding:"5px 12px",background:"#2563EB",color:"#fff",borderRadius:6,cursor:"pointer",fontFamily:F,flexShrink:0}}>Pro u2197</span>
+        <span onClick={onUpgrade} style={{fontSize:11,fontWeight:600,padding:"5px 12px",background:"#2563EB",color:"#fff",borderRadius:6,cursor:"pointer",fontFamily:F,flexShrink:0}}>Pro ↗</span>
       </div>
     </nav>
   );
