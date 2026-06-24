@@ -1,5 +1,5 @@
 import UpgradeModal from "./UpgradeModal.jsx";
-import { useState, useEffect, useMemo, createContext, useContext } from "react";
+import React, { useState, useEffect, useMemo, createContext, useContext } from "react";
 
 const StudyModeContext = createContext({ studyMode: false, setStudyMode: () => {} });
 const F = "Plus Jakarta Sans, sans-serif";
@@ -887,7 +887,71 @@ function loadLS(key,fallback){try{const v=localStorage.getItem(key);return v?JSO
 
 const DEFAULT_PATIENT={caseName:"",sex:"F",weightLb:145,heightIn:67,age:28,waist:89,goal:"mantener",activity:0,condition:"none",protPct:17,lipPct:30,hcPct:53,mealTimes:4,protG:67,lipG:53,hcG:210,vet:1582,geb:1479,exchanges:null};
 
-function CasesDrawer({isES, cases, onLoad, onDelete, onClose, isMobile}) {
+function PortfolioModal({isES,cases,onClose,onUpgrade,isMobile,FREE_LIMIT}) {
+  const [groupBy,setGroupBy]=React.useState("condition");
+  const condLabel={"none":isES?"Normal":"Normal","dm2":"DM2","obesity":isES?"Obesidad":"Obesity"};
+  const goalLabel={"bajar":isES?"Bajar peso":"Lose weight","mantener":isES?"Mantener":"Maintain","subir":isES?"Subir peso":"Gain weight"};
+  const sexLabel={"F":isES?"Femenino":"Female","M":isES?"Masculino":"Male"};
+  function getKey(cas){if(groupBy==="condition")return cas.snapshot&&cas.snapshot.condition?cas.snapshot.condition:"none";if(groupBy==="sex")return cas.sex||"F";return cas.goal||"mantener";}
+  function getLabel(k){if(groupBy==="condition")return condLabel[k]||k;if(groupBy==="sex")return sexLabel[k]||k;return goalLabel[k]||k;}
+  const groups={};
+  cases.forEach(function(cas,i){var k=getKey(cas);if(!groups[k])groups[k]=[];groups[k].push(Object.assign({},cas,{_idx:i}));});
+  const avgVet=cases.length>0?Math.round(cases.reduce(function(s,cas){return s+(cas.vet||0);},0)/cases.length):0;
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:2100,display:"flex",alignItems:"flex-start",justifyContent:"center",background:"rgba(0,0,0,0.45)",padding:"20px",overflowY:"auto"}}>
+      <div style={{background:"#fff",borderRadius:16,width:"100%",maxWidth:600,fontFamily:F,marginTop:20,marginBottom:20}}>
+        <div style={{padding:"18px 20px",borderBottom:"0.5px solid #D4E3FF",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div>
+            <div style={{fontSize:15,fontWeight:600,color:"#1E2D4E"}}>{isES?"Portafolio academico":"Academic portfolio"}</div>
+            <div style={{fontSize:11,color:"#3A5BA0",marginTop:2}}>{cases.length} {isES?"casos":"cases"} · avg VET {avgVet} kcal</div>
+          </div>
+          <button onClick={onClose} style={{border:"none",background:"#F5F7FF",borderRadius:6,padding:"6px 10px",cursor:"pointer",fontSize:14,color:"#3A5BA0"}}>&#x2715;</button>
+        </div>
+        <div style={{padding:"14px 20px",borderBottom:"0.5px solid #D4E3FF",display:"flex",gap:8}}>
+          {[{k:"condition",l:isES?"Condicion":"Condition"},{k:"sex",l:isES?"Sexo":"Sex"},{k:"goal",l:isES?"Objetivo":"Goal"}].map(function(opt){return(
+            <button key={opt.k} onClick={function(){setGroupBy(opt.k);}} style={{padding:"6px 14px",borderRadius:20,fontSize:12,fontWeight:500,cursor:"pointer",fontFamily:F,border:groupBy===opt.k?"2px solid #2563EB":"0.5px solid #D4E3FF",background:groupBy===opt.k?"#2563EB":"#F5F7FF",color:groupBy===opt.k?"#fff":"#3A5BA0"}}>{opt.l}</button>
+          );})}
+        </div>
+        <div style={{padding:"14px 20px",maxHeight:"55vh",overflowY:"auto"}}>
+          {cases.length===0&&<div style={{textAlign:"center",padding:"40px",color:"#3A5BA0",fontSize:13}}>{isES?"Aun no hay casos.":"No cases yet."}</div>}
+          {Object.entries(groups).map(function([key,grp]){return(
+            <div key={key} style={{marginBottom:18}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                <span style={{fontSize:11,fontWeight:600,color:"#1E2D4E",textTransform:"uppercase",letterSpacing:"0.05em"}}>{getLabel(key)}</span>
+                <span style={{fontSize:10,color:"#3A5BA0",background:"#F5F7FF",border:"0.5px solid #D4E3FF",borderRadius:10,padding:"1px 7px"}}>{grp.length}</span>
+              </div>
+              {grp.map(function(cas){
+                var locked=cas._idx>=FREE_LIMIT;
+                return (
+                  <div key={cas.id} style={{position:"relative",marginBottom:6}}>
+                    <div style={{background:"#F5F7FF",border:"0.5px solid #D4E3FF",borderRadius:10,padding:"10px 12px",display:"flex",alignItems:"center",gap:10,filter:locked?"blur(3px)":"none",pointerEvents:locked?"none":"auto"}}>
+                      <div style={{flex:1}}>
+                        <div style={{fontSize:12,fontWeight:600,color:"#1E2D4E"}}>{cas.name||"—"}</div>
+                        <div style={{fontSize:10,color:"#3A5BA0",marginTop:1}}>{cas.date}</div>
+                      </div>
+                      <div style={{display:"flex",gap:6}}>
+                        {[{l:"VET",v:cas.vet+" kcal"},{l:isES?"Sexo":"Sex",v:cas.sex},{l:isES?"Obj":"Goal",v:cas.goal==="bajar"?"↓":cas.goal==="subir"?"↑":"→"}].map(function(kv){return(
+                          <div key={kv.l} style={{background:"#fff",border:"0.5px solid #D4E3FF",borderRadius:6,padding:"3px 7px",textAlign:"center"}}>
+                            <div style={{fontSize:8,color:"#3A5BA0",textTransform:"uppercase"}}>{kv.l}</div>
+                            <div style={{fontSize:10,fontWeight:600,color:"#1E2D4E"}}>{kv.v}</div>
+                          </div>
+                        );})}
+                      </div>
+                    </div>
+                    {locked&&<div onClick={onUpgrade} style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",borderRadius:10}}><div style={{background:"#2563EB",color:"#fff",borderRadius:20,padding:"4px 14px",fontSize:11,fontWeight:600}}>Pro</div></div>}
+                  </div>
+                );
+              })}
+            </div>
+          );})}
+        </div>
+        {cases.length>=FREE_LIMIT&&<div style={{padding:"14px 20px",borderTop:"0.5px solid #D4E3FF",background:"#F5F7FF",borderRadius:"0 0 16px 16px"}}><button onClick={onUpgrade} style={{width:"100%",padding:"11px",borderRadius:8,background:"#2563EB",color:"#fff",fontSize:13,fontWeight:500,border:"none",cursor:"pointer",fontFamily:F}}>{isES?"Desbloquear portafolio completo - Pro":"Unlock full portfolio - Pro"}</button></div>}
+      </div>
+    </div>
+  );
+}
+
+function CasesDrawer({isES, cases, onLoad, onDelete, onClose, onPortfolio, isMobile}) {
   return (
     <div style={{position:"fixed",top:0,right:0,bottom:0,zIndex:2000,display:"flex"}}>
       <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.25)"}}/>
@@ -928,6 +992,11 @@ function CasesDrawer({isES, cases, onLoad, onDelete, onClose, isMobile}) {
             </div>
           ))}
         </div>
+        <div style={{padding:"12px",borderTop:"0.5px solid #D4E3FF",flexShrink:0}}>
+          <button onClick={onPortfolio} style={{width:"100%",padding:"10px",borderRadius:8,background:"#1E2D4E",color:"#E2E8F0",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:F}}>
+            {isES?"📋 Ver portafolio academico":"📋 View academic portfolio"}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -966,6 +1035,7 @@ export default function App() {
   function setStudyMode(val){setStudyModeRaw(val);try{localStorage.setItem(LS_KEY_STUDY,JSON.stringify(val));}catch{}}
   const [savedCases,setSavedCasesRaw]=useState(()=>loadLS(LS_KEY_CASES,[]));
   const [showCases,setShowCases]=useState(false);
+  const [showPortfolio,setShowPortfolio]=useState(false);
   function setSavedCases(val){setSavedCasesRaw(val);try{localStorage.setItem(LS_KEY_CASES,JSON.stringify(val));}catch{}}
   function saveCurrentCase(){
     if(!patientState.caseName) return;
@@ -1004,7 +1074,8 @@ export default function App() {
           {screen==="s4"&&<Screen4 lang={lang} isMobile={isMobile}/>}
         </div>
       </div>
-    {showCases&&<CasesDrawer isES={lang==="ES"} cases={savedCases} onLoad={loadCase} onDelete={deleteCase} onClose={()=>setShowCases(false)} isMobile={isMobile}/>}
+    {showCases&&<CasesDrawer isES={lang==="ES"} cases={savedCases} onLoad={loadCase} onDelete={deleteCase} onClose={()=>setShowCases(false)} onPortfolio={()=>{setShowCases(false);setShowPortfolio(true);}} isMobile={isMobile}/>}
+    {showPortfolio&&<PortfolioModal isES={lang==="ES"} cases={savedCases} onClose={()=>setShowPortfolio(false)} onUpgrade={()=>{setShowPortfolio(false);setShowUpgrade(true);}} isMobile={isMobile} FREE_LIMIT={FREE_LIMIT}/>}
     {showUpgrade&&<UpgradeModal isES={lang==="ES"} onClose={()=>setShowUpgrade(false)} caseCount={caseCount} freeLimit={FREE_LIMIT}/>}
     </StudyModeContext.Provider>
   );
