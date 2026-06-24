@@ -712,6 +712,7 @@ export default function App() {
                   ◎ PDF Study
                 </button>
               </div>
+                <button onClick={()=>window.location.href="/"} style={{padding:"9px 0",borderRadius:8,background:"transparent",color:"#3A5BA0",fontSize:12,fontWeight:500,border:"0.5px solid #D4E3FF",cursor:"pointer",fontFamily:FONT,marginTop:4}}>{isES?"← Calculadora":"← Calculator"}</button>
             </div>
           </div>
         </div>
