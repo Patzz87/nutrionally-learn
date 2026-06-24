@@ -897,6 +897,21 @@ function PortfolioModal({isES,cases,onClose,onUpgrade,isMobile,FREE_LIMIT}) {
   const groups={};
   cases.forEach(function(cas,i){var k=getKey(cas);if(!groups[k])groups[k]=[];groups[k].push(Object.assign({},cas,{_idx:i}));});
   const avgVet=cases.length>0?Math.round(cases.reduce(function(s,cas){return s+(cas.vet||0);},0)/cases.length):0;
+  const avgVetF=cases.filter(function(c){return c.sex==="F";}).length>0?Math.round(cases.filter(function(c){return c.sex==="F";}).reduce(function(s,c){return s+(c.vet||0);},0)/cases.filter(function(c){return c.sex==="F";}).length):0;
+  const avgVetM=cases.filter(function(c){return c.sex==="M";}).length>0?Math.round(cases.filter(function(c){return c.sex==="M";}).reduce(function(s,c){return s+(c.vet||0);},0)/cases.filter(function(c){return c.sex==="M";}).length):0;
+  const condCounts={};cases.forEach(function(c){var k=c.snapshot&&c.snapshot.condition?c.snapshot.condition:"none";condCounts[k]=(condCounts[k]||0)+1;});
+  const goalCounts={};cases.forEach(function(c){goalCounts[c.goal||"mantener"]=(goalCounts[c.goal||"mantener"]||0)+1;});
+  const topCond=Object.entries(condCounts).sort(function(a,b){return b[1]-a[1];})[0];
+  const topGoal=Object.entries(goalCounts).sort(function(a,b){return b[1]-a[1];})[0];
+  function exportCSV(){
+    var headers=["Nombre","Fecha","Sexo","VET (kcal)","Objetivo","Condicion","Prot%","Lip%","HC%"];
+    var rows=cases.map(function(c){return [c.name||"",c.date||"",c.sex||"",c.vet||"",c.goal||"",c.snapshot&&c.snapshot.condition?c.snapshot.condition:"none",c.snapshot&&c.snapshot.protPct?c.snapshot.protPct:"",c.snapshot&&c.snapshot.lipPct?c.snapshot.lipPct:"",c.snapshot&&c.snapshot.hcPct?c.snapshot.hcPct:""].join(",");});
+    var csv=[headers.join(",")].concat(rows).join("\n");
+    var blob=new Blob([csv],{type:"text/csv"});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement("a");a.href=url;a.download="portafolio-nutrionally.csv";a.click();
+    URL.revokeObjectURL(url);
+  }
   return (
     <div style={{position:"fixed",inset:0,zIndex:2100,display:"flex",alignItems:"flex-start",justifyContent:"center",background:"rgba(0,0,0,0.45)",padding:"20px",overflowY:"auto"}}>
       <div style={{background:"#fff",borderRadius:16,width:"100%",maxWidth:600,fontFamily:F,marginTop:20,marginBottom:20}}>
@@ -907,7 +922,25 @@ function PortfolioModal({isES,cases,onClose,onUpgrade,isMobile,FREE_LIMIT}) {
           </div>
           <button onClick={onClose} style={{border:"none",background:"#F5F7FF",borderRadius:6,padding:"6px 10px",cursor:"pointer",fontSize:14,color:"#3A5BA0"}}>&#x2715;</button>
         </div>
-        <div style={{padding:"14px 20px",borderBottom:"0.5px solid #D4E3FF",display:"flex",gap:8}}>
+        <div style={{padding:"14px 20px",borderBottom:"0.5px solid #D4E3FF",display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8}}>
+          <div style={{background:"#F5F7FF",borderRadius:10,padding:"10px 12px",border:"0.5px solid #D4E3FF"}}>
+            <div style={{fontSize:9,color:"#3A5BA0",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:4}}>{isES?"VET promedio":"Avg VET"}</div>
+            <div style={{fontSize:14,fontWeight:600,color:"#1E2D4E"}}>{avgVet} <span style={{fontSize:10,color:"#3A5BA0"}}>kcal</span></div>
+            <div style={{fontSize:10,color:"#3A5BA0",marginTop:2}}>F: {avgVetF} · M: {avgVetM} kcal</div>
+          </div>
+          <div style={{background:"#F5F7FF",borderRadius:10,padding:"10px 12px",border:"0.5px solid #D4E3FF"}}>
+            <div style={{fontSize:9,color:"#3A5BA0",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:4}}>{isES?"Distribucion":"Distribution"}</div>
+            <div style={{fontSize:11,color:"#1E2D4E"}}>{isES?"Cond. frec.:":"Top cond.:"} <strong>{topCond?topCond[0]:"—"}</strong> ({topCond?topCond[1]:0})</div>
+            <div style={{fontSize:11,color:"#1E2D4E",marginTop:2}}>{isES?"Obj. frec.:":"Top goal:"} <strong>{topGoal?topGoal[0]:"—"}</strong> ({topGoal?topGoal[1]:0})</div>
+          </div>
+          <div style={{gridColumn:"1/-1",display:"flex",gap:8}}>
+            {[{k:"condition",l:isES?"Condicion":"Condition"},{k:"sex",l:isES?"Sexo":"Sex"},{k:"goal",l:isES?"Objetivo":"Goal"}].map(function(opt){return(
+              <button key={opt.k} onClick={function(){setGroupBy(opt.k);}} style={{padding:"6px 14px",borderRadius:20,fontSize:12,fontWeight:500,cursor:"pointer",fontFamily:F,border:groupBy===opt.k?"2px solid #2563EB":"0.5px solid #D4E3FF",background:groupBy===opt.k?"#2563EB":"#F5F7FF",color:groupBy===opt.k?"#fff":"#3A5BA0"}}>{opt.l}</button>
+            );})}
+            {cases.length>0&&<button onClick={exportCSV} style={{marginLeft:"auto",padding:"6px 14px",borderRadius:20,fontSize:12,fontWeight:500,cursor:"pointer",fontFamily:F,border:"0.5px solid #22c55e",background:"#f0fdf4",color:"#16a34a"}}>CSV</button>}
+          </div>
+        </div>
+        <div style={{padding:"14px 20px",borderBottom:"0.5px solid #D4E3FF",display:"flex",gap:8,display:"none"}}>
           {[{k:"condition",l:isES?"Condicion":"Condition"},{k:"sex",l:isES?"Sexo":"Sex"},{k:"goal",l:isES?"Objetivo":"Goal"}].map(function(opt){return(
             <button key={opt.k} onClick={function(){setGroupBy(opt.k);}} style={{padding:"6px 14px",borderRadius:20,fontSize:12,fontWeight:500,cursor:"pointer",fontFamily:F,border:groupBy===opt.k?"2px solid #2563EB":"0.5px solid #D4E3FF",background:groupBy===opt.k?"#2563EB":"#F5F7FF",color:groupBy===opt.k?"#fff":"#3A5BA0"}}>{opt.l}</button>
           );})}
