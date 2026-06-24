@@ -245,7 +245,7 @@ function EquivPanel({isES}) {
               ))}
             </tbody>
           </table>
-          <div style={{padding:"8px 16px", background:"#F5F7FF", fontSize:10, color:"#3A5BA0", fontFamily:FONT}}>Valores por 1 intercambio · INCAP / USDA</div>
+          <div style={{padding:"8px 16px", background:"#F5F7FF", fontSize:10, color:"#3A5BA0", fontFamily:FONT}}>{isES?"Valores por 1 intercambio · INCAP / USDA":"Values per 1 exchange · INCAP / USDA"}</div>
         </div>
       )}
     </div>
