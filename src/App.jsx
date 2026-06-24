@@ -136,7 +136,7 @@ function hamwi(sex,heightIn) {
   return +(48.0+2.7*(heightIn-60)).toFixed(1);
 }
 
-function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade,setCaseStarted,onCases,casesLabel,casesCount}) {
+function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade,setCaseStarted,onCases,casesLabel,casesCount,onNewCase}) {
   const {studyMode,setStudyMode} = useContext(StudyModeContext);
   return (
     <nav style={{background:"#1E2D4E",height:52,display:"flex",alignItems:"center",padding:"0 20px",gap:20,borderBottom:"0.5px solid #2D4270",position:"sticky",top:0,zIndex:200,flexShrink:0}}>
@@ -165,7 +165,7 @@ function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade,setCaseStarted
             <button key={l} onClick={()=>setLang(l)} style={{padding:"5px 10px",fontSize:12,fontWeight:500,cursor:"pointer",background:lang===l?"#2563EB":"transparent",color:lang===l?"#fff":"#93C5FD",border:"none",fontFamily:F}}>{l}</button>
           ))}
         </div>
-        {onCases&&<button onClick={onCases} style={{fontSize:12,fontWeight:500,padding:"5px 10px",borderRadius:6,background:"transparent",color:"#93C5FD",border:"0.5px solid #3A5BA0",cursor:"pointer",fontFamily:F,flexShrink:0}}>{casesLabel}{casesCount>0&&<span style={{background:"#2563EB",color:"#fff",borderRadius:10,padding:"1px 5px",fontSize:10,fontWeight:600,marginLeft:4}}>{casesCount}</span>}</button>}<span onClick={onUpgrade} style={{fontSize:11,fontWeight:600,padding:"5px 12px",background:"#2563EB",color:"#fff",borderRadius:6,cursor:"pointer",fontFamily:F,flexShrink:0}}>Pro ↗</span>
+        {onNewCase&&<button onClick={onNewCase} style={{fontSize:12,fontWeight:500,padding:"5px 10px",borderRadius:6,background:"transparent",color:"#93C5FD",border:"0.5px solid #3A5BA0",cursor:"pointer",fontFamily:F,flexShrink:0}}>{lang==="ES"?"+ Nuevo":"+ New"}</button>}{onCases&&<button onClick={onCases} style={{fontSize:12,fontWeight:500,padding:"5px 10px",borderRadius:6,background:"transparent",color:"#93C5FD",border:"0.5px solid #3A5BA0",cursor:"pointer",fontFamily:F,flexShrink:0}}>{casesLabel}{casesCount>0&&<span style={{background:"#2563EB",color:"#fff",borderRadius:10,padding:"1px 5px",fontSize:10,fontWeight:600,marginLeft:4}}>{casesCount}</span>}</button>}<span onClick={onUpgrade} style={{fontSize:11,fontWeight:600,padding:"5px 12px",background:"#2563EB",color:"#fff",borderRadius:6,cursor:"pointer",fontFamily:F,flexShrink:0}}>Pro ↗</span>
       </div>
     </nav>
   );
@@ -195,13 +195,15 @@ const T1={
 };
 
 function Screen1({lang,state,setState,setScreen,isMobile,caseStarted,setCaseStarted,FREE_LIMIT,setCaseCount,setShowUpgrade}) {
+  const {studyMode}=useContext(StudyModeContext);
   const t=T1[lang];
   const {caseName,sex,weightLb,heightIn,age,waist,goal,activity,condition="none"}=state;
   const wkg=+(weightLb*0.4536).toFixed(1);
   const hm=+(heightIn*0.0254).toFixed(2);
   const hcm=+(heightIn*2.54).toFixed(1);
-  const bmi=+(wkg/(hm**2)).toFixed(1);
-  const bs=bmi<18.5?"bajo":bmi<25?"normal":bmi<30?"sobre":"obeso";
+  const hasData=weightLb>0&&heightIn>0&&age>0;
+  const bmi=hasData?+(wkg/(hm**2)).toFixed(1):0;
+  const bs=!hasData?"normal":bmi<18.5?"bajo":bmi<25?"normal":bmi<30?"sobre":"obeso";
   const bmiC={bajo:{bg:"#E2E8F0",text:"#475569"},normal:{bg:"#EFF6FF",text:"#2563EB"},sobre:{bg:"#FAEEDA",text:"#854F0B"},obeso:{bg:"#FCEBEB",text:"#A32D2D"}};
   const geb=Math.round(sex==="F"?(655+9.6*wkg+1.9*hcm-4.7*age):(66+13.8*wkg+5*hcm-6.8*age));
   const kcalMap={bajar:20,mantener:24,subir:28};
@@ -231,6 +233,7 @@ function Screen1({lang,state,setState,setScreen,isMobile,caseStarted,setCaseStar
       <div style={{fontSize:11,fontWeight:500,color:"#2D4270",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:12,fontFamily:F,display:"flex",alignItems:"center",gap:6}}>
         <div style={{width:6,height:6,borderRadius:"50%",background:"#2563EB"}}/>{t.results}
       </div>
+      {studyMode&&hasData&&<StudyPanel isES={lang==="ES"} patient={patient} geb={geb} vet={patient.vet||0} bmi={bmi} bs={bs} hasData={hasData} F={F}/>}
       {[{label:t.bmi,value:bmi,badge:t.bmiS[bs],badgeColor:bmiC[bs]},{label:t.geb,value:geb.toLocaleString(),unit:t.kcalDay},{label:t.vet,value:vet.toLocaleString(),unit:t.kcalDay}].map(k=>(
         <div key={k.label} style={{background:"#1E2D4E",border:"0.5px solid #2D4270",borderRadius:10,padding:"11px 14px",marginBottom:8}}>
           <div style={{fontSize:9,fontWeight:500,color:"#93C5FD",textTransform:"uppercase",letterSpacing:"0.05em",fontFamily:F,marginBottom:5}}>{k.label}</div>
@@ -287,7 +290,7 @@ function Screen1({lang,state,setState,setScreen,isMobile,caseStarted,setCaseStar
   return (
     <div style={{maxWidth:1100,margin:"0 auto",padding:isMobile?"14px 12px":"22px 24px"}}>
       <div style={{marginBottom:18}}>
-        <h1 style={{fontSize:22,fontWeight:500,color:"#1E2D4E",margin:"0 0 4px",fontFamily:F}}>{t.title}</h1>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}><h1 style={{fontSize:22,fontWeight:500,color:"#1E2D4E",margin:0,fontFamily:F}}>{t.title}</h1><button onClick={()=>{setState({...DEFAULT_PATIENT});setCaseStarted(false);try{localStorage.removeItem("nl_patient_v1");}catch{}}} style={{padding:"7px 14px",borderRadius:8,background:"#F5F7FF",color:"#3A5BA0",fontSize:12,fontWeight:500,border:"0.5px solid #D4E3FF",cursor:"pointer",fontFamily:F}}>{lang==="ES"?"+ Nuevo caso":"+ New case"}</button></div>
         <p style={{fontSize:13,color:"#3A5BA0",margin:0,fontFamily:F}}>{t.subtitle}</p>
       </div>
       <div style={{display:isMobile?"block":"grid",gridTemplateColumns:"1fr 300px",gap:18}}>
@@ -357,6 +360,7 @@ function Screen1({lang,state,setState,setScreen,isMobile,caseStarted,setCaseStar
 }
 
 function Screen2({lang,state,setState,setScreen,isMobile}) {
+  const {studyMode}=useContext(StudyModeContext);
   const {weightLb,heightIn,age,sex,goal}=state;
   const wkg=+(weightLb*0.4536).toFixed(1);
   const hcm=+(heightIn*2.54).toFixed(1);
@@ -370,10 +374,10 @@ function Screen2({lang,state,setState,setScreen,isMobile}) {
   const protG=+(vet*protPct/100/4).toFixed(1);
   const lipG=+(vet*lipPct/100/9).toFixed(1);
   const hcG=+(vet*hcPct/100/4).toFixed(1);
-  const protGkg=+(protG/wkg).toFixed(2);
-  const lipGkg=+(lipG/wkg).toFixed(2);
-  const hcGkg=+(hcG/wkg).toFixed(2);
-  const enp=+((vet*lipPct/100+vet*hcPct/100)/(protG*0.16)).toFixed(1);
+  const protGkg=wkg>0?+(protG/wkg).toFixed(2):0;
+  const lipGkg=wkg>0?+(lipG/wkg).toFixed(2):0;
+  const hcGkg=wkg>0?+(hcG/wkg).toFixed(2):0;
+  const enp=protG>0?+((vet*lipPct/100+vet*hcPct/100)/(protG*0.16)).toFixed(1):0;
 
   useEffect(()=>{
     if(state.condition==="dm2"){setProtPct(22);setLipPct(31);}
@@ -493,14 +497,14 @@ function Screen2({lang,state,setState,setScreen,isMobile}) {
             <div style={{fontSize:20,fontWeight:500,color:"#1E2D4E",fontFamily:F}}>{enp}</div>
             <div style={{fontSize:10,color:"#3A5BA0",marginTop:3,fontFamily:F}}>= (Kcal lip + Kcal HC) / (g prot x 0.16)</div>
           </div>
-          <div style={{background:"#1E2D4E",borderRadius:10,padding:"12px 14px"}}>
+          {studyMode&&<div style={{background:"#1E2D4E",borderRadius:10,padding:"12px 14px"}}>
             <div style={{fontSize:9,color:"#93C5FD",fontWeight:500,textTransform:"uppercase",letterSpacing:"0.05em",fontFamily:F,marginBottom:8}}>Harris-Benedict</div>
             <div style={{fontSize:10,color:"#D4E3FF",fontFamily:"monospace",lineHeight:1.9}}>
               <div>F: 655+(9.6xkg)+(1.9xcm)-(4.7xedad)</div>
               <div style={{color:"#3A5BA0"}}>────</div>
               <div style={{color:"#8B949E"}}>M: 66+(13.8xkg)+(5xcm)-(6.8xedad)</div>
             </div>
-          </div>
+          </div>}
           <div style={{display:"flex",flexDirection:"column",gap:8,marginTop:4}}>
             <button onClick={()=>window.location.href="/intercambios"} style={{padding:"11px 0",borderRadius:8,background:"#2563EB",color:"#fff",fontSize:13,fontWeight:500,border:"none",cursor:"pointer",fontFamily:F}}>
               {isES?"Ver plan de intercambios →":"View exchange plan →"}
@@ -885,7 +889,9 @@ const LS_KEY_STUDY="nl_study_v1";
 const LS_KEY_CASES="nl_cases_v1";
 function loadLS(key,fallback){try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback;}catch{return fallback;}}
 
-const DEFAULT_PATIENT={caseName:"",sex:"F",weightLb:145,heightIn:67,age:28,waist:89,goal:"mantener",activity:0,condition:"none",protPct:17,lipPct:30,hcPct:53,mealTimes:4,protG:67,lipG:53,hcG:210,vet:1582,geb:1479,exchanges:null};
+const DEFAULT_PATIENT={caseName:"",sex:"F",weightLb:0,heightIn:0,age:0,waist:0,goal:"mantener",activity:0,condition:"none",protPct:17,lipPct:30,hcPct:53,mealTimes:4,protG:0,lipG:0,hcG:0,vet:0,geb:0,exchanges:null};
+
+const DEMO_PATIENT={caseName:"Maria (Ejemplo)",sex:"F",weightLb:185,heightIn:65,age:28,waist:95,goal:"mantener",activity:1,condition:"obesity",protPct:17,lipPct:30,hcPct:53,mealTimes:4,protG:0,lipG:0,hcG:0,vet:0,geb:0,exchanges:null};
 
 function PortfolioModal({isES,cases,onClose,onUpgrade,isMobile,FREE_LIMIT}) {
   const [groupBy,setGroupBy]=React.useState("condition");
@@ -940,7 +946,7 @@ function PortfolioModal({isES,cases,onClose,onUpgrade,isMobile,FREE_LIMIT}) {
             {cases.length>0&&<button onClick={exportCSV} style={{marginLeft:"auto",padding:"6px 14px",borderRadius:20,fontSize:12,fontWeight:500,cursor:"pointer",fontFamily:F,border:"0.5px solid #22c55e",background:"#f0fdf4",color:"#16a34a"}}>CSV</button>}
           </div>
         </div>
-        <div style={{padding:"14px 20px",borderBottom:"0.5px solid #D4E3FF",display:"flex",gap:8,display:"none"}}>
+        <div style={{padding:"14px 20px",borderBottom:"0.5px solid #D4E3FF",display:"none"}}>
           {[{k:"condition",l:isES?"Condicion":"Condition"},{k:"sex",l:isES?"Sexo":"Sex"},{k:"goal",l:isES?"Objetivo":"Goal"}].map(function(opt){return(
             <button key={opt.k} onClick={function(){setGroupBy(opt.k);}} style={{padding:"6px 14px",borderRadius:20,fontSize:12,fontWeight:500,cursor:"pointer",fontFamily:F,border:groupBy===opt.k?"2px solid #2563EB":"0.5px solid #D4E3FF",background:groupBy===opt.k?"#2563EB":"#F5F7FF",color:groupBy===opt.k?"#fff":"#3A5BA0"}}>{opt.l}</button>
           );})}
@@ -1035,7 +1041,7 @@ function CasesDrawer({isES, cases, onLoad, onDelete, onClose, onPortfolio, isMob
   );
 }
 
-function FirstRunHint({isES}) {
+function FirstRunHint({isES, onDemo}) {
   return (
     <div style={{background:"linear-gradient(135deg,#EFF6FF,#F5F7FF)",border:"0.5px solid #D4E3FF",borderRadius:12,padding:"16px 18px",marginBottom:16}}>
       <div style={{fontSize:12,fontWeight:600,color:"#1E2D4E",fontFamily:F,marginBottom:10}}>{isES?"Como funciona Nutrionally Learn":"How Nutrionally Learn works"}</div>
@@ -1050,6 +1056,70 @@ function FirstRunHint({isES}) {
           </div>
         ))}
       </div>
+      {onDemo&&<button onClick={onDemo} style={{marginTop:12,padding:"8px 18px",borderRadius:8,background:"#2563EB",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Ver paciente de ejemplo":"View example patient"}</button>}
+    </div>
+  );
+}
+
+function StudyPanel({isES, patient, geb, vet, bmi, bs, hasData, F}) {
+  if (!hasData) return null;
+  const wkg = +(patient.weightLb * 0.453592).toFixed(1);
+  const hm = +(patient.heightIn * 0.0254).toFixed(3);
+  const isF = patient.sex === "F";
+  const actLabels = ["Sedentario (x1.2)","Ligero (x1.375)","Moderado (x1.55)","Activo (x1.725)","Muy activo (x1.9)"];
+  const actLabelsEN = ["Sedentary (x1.2)","Light (x1.375)","Moderate (x1.55)","Active (x1.725)","Very active (x1.9)"];
+  const actF = [1.2,1.375,1.55,1.725,1.9];
+  const af = actF[patient.activity||0];
+  const gebF = isF ? 655.1 : 66.5;
+  const gebW = isF ? 9.563 : 13.75;
+  const gebH = isF ? 1.850 : 5.003;
+  const gebA = isF ? 4.676 : 6.775;
+  const condNote = patient.condition === "dm2"
+    ? (isES ? "DM2: se recomienda restriccion moderada de HC (45-60%). Proteina 15-20%, lipidos 25-35%." : "DM2: moderate HC restriction recommended (45-60%). Protein 15-20%, fat 25-35%.")
+    : patient.condition === "obesity"
+    ? (isES ? "Obesidad: deficit calorico de 500-1000 kcal/dia. Proteina alta (1.2-1.5 g/kg) para preservar masa muscular." : "Obesity: 500-1000 kcal/day deficit. High protein (1.2-1.5 g/kg) to preserve lean mass.")
+    : null;
+  return (
+    <div style={{background:"linear-gradient(135deg,#EFF6FF,#F0FDF4)",border:"0.5px solid #93C5FD",borderRadius:12,padding:"14px 16px",marginTop:12,fontFamily:F}}>
+      <div style={{fontSize:10,fontWeight:600,color:"#2563EB",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:10}}>
+        {isES ? "Modo estudio — Harris-Benedict" : "Study mode — Harris-Benedict"}
+      </div>
+      <div style={{fontSize:11,color:"#1E2D4E",lineHeight:1.7,marginBottom:8}}>
+        <div style={{fontWeight:500,marginBottom:4}}>{isES?"Formula:":"Formula:"}</div>
+        <div style={{background:"#fff",borderRadius:8,padding:"8px 10px",fontSize:11,color:"#3A5BA0",border:"0.5px solid #D4E3FF"}}>
+          {isF
+            ? `GEB = 655.1 + (9.563 × ${wkg}kg) + (1.850 × ${(hm*100).toFixed(0)}cm) − (4.676 × ${patient.age}años)`
+            : `GEB = 66.5 + (13.75 × ${wkg}kg) + (5.003 × ${(hm*100).toFixed(0)}cm) − (6.775 × ${patient.age}años)`
+          }
+        </div>
+        <div style={{background:"#fff",borderRadius:8,padding:"8px 10px",fontSize:11,color:"#1E2D4E",border:"0.5px solid #D4E3FF",marginTop:4}}>
+          {isF
+            ? `= ${gebF} + ${(gebW*wkg).toFixed(1)} + ${(gebH*hm*100).toFixed(1)} − ${(gebA*patient.age).toFixed(1)} = ${geb} kcal`
+            : `= ${gebF} + ${(gebW*wkg).toFixed(1)} + ${(gebH*hm*100).toFixed(1)} − ${(gebA*patient.age).toFixed(1)} = ${geb} kcal`
+          }
+        </div>
+        <div style={{background:"#fff",borderRadius:8,padding:"8px 10px",fontSize:11,color:"#1E2D4E",border:"0.5px solid #D4E3FF",marginTop:4}}>
+          {`VET = ${geb} × ${af} (${isES?actLabels[patient.activity||0]:actLabelsEN[patient.activity||0]}) = ${vet} kcal`}
+        </div>
+      </div>
+      <div style={{display:"flex",gap:8,marginBottom:condNote?8:0}}>
+        <div style={{flex:1,background:"#fff",borderRadius:8,padding:"8px 10px",border:"0.5px solid #D4E3FF"}}>
+          <div style={{fontSize:9,color:"#3A5BA0",textTransform:"uppercase",marginBottom:2}}>IMC</div>
+          <div style={{fontSize:13,fontWeight:600,color:"#1E2D4E"}}>{bmi}</div>
+          <div style={{fontSize:10,color:bs==="obeso"?"#dc2626":bs==="sobre"?"#d97706":bs==="bajo"?"#7c3aed":"#16a34a"}}>{isES?bs:bs==="bajo"?"underweight":bs==="normal"?"normal":bs==="sobre"?"overweight":"obese"}</div>
+        </div>
+        <div style={{flex:1,background:"#fff",borderRadius:8,padding:"8px 10px",border:"0.5px solid #D4E3FF"}}>
+          <div style={{fontSize:9,color:"#3A5BA0",textTransform:"uppercase",marginBottom:2}}>{isES?"Prot g/kg":"Prot g/kg"}</div>
+          <div style={{fontSize:13,fontWeight:600,color:"#1E2D4E"}}>{wkg>0?(patient.protG/wkg).toFixed(1):"—"}</div>
+          <div style={{fontSize:10,color:"#3A5BA0"}}>{isES?"Ref: 0.8-2.0 g/kg":"Ref: 0.8-2.0 g/kg"}</div>
+        </div>
+        <div style={{flex:1,background:"#fff",borderRadius:8,padding:"8px 10px",border:"0.5px solid #D4E3FF"}}>
+          <div style={{fontSize:9,color:"#3A5BA0",textTransform:"uppercase",marginBottom:2}}>{isES?"kcal/kg":"kcal/kg"}</div>
+          <div style={{fontSize:13,fontWeight:600,color:"#1E2D4E"}}>{wkg>0?Math.round(vet/wkg):"—"}</div>
+          <div style={{fontSize:10,color:"#3A5BA0"}}>{isES?"Ref: 25-35 kcal/kg":"Ref: 25-35 kcal/kg"}</div>
+        </div>
+      </div>
+      {condNote&&<div style={{background:"#FEF9E7",border:"0.5px solid #fcd34d",borderRadius:8,padding:"8px 10px",fontSize:11,color:"#854F0B",lineHeight:1.5}}>{condNote}</div>}
     </div>
   );
 }
@@ -1088,7 +1158,7 @@ export default function App() {
     <StudyModeContext.Provider value={{studyMode,setStudyMode}}>
       <div style={{fontFamily:F,background:"#F5F7FF",minHeight:"100vh",display:"flex",flexDirection:"column"}}>
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
-        <Navbar lang={lang} setLang={setLang} screen={screen} setScreen={setScreen} isMobile={isMobile} onUpgrade={()=>setShowUpgrade(true)} setCaseStarted={setCaseStarted}onCases={()=>{saveCurrentCase();setShowCases(true);}} casesLabel={lang==="ES"?"Casos":"Cases"} casesCount={savedCases.length}/>
+        <Navbar lang={lang} setLang={setLang} screen={screen} setScreen={setScreen} isMobile={isMobile} onUpgrade={()=>setShowUpgrade(true)} setCaseStarted={setCaseStarted}onCases={()=>{saveCurrentCase();setShowCases(true);}} casesLabel={lang==="ES"?"Casos":"Cases"} casesCount={savedCases.length} onNewCase={()=>{setPatientState({...DEFAULT_PATIENT});setCaseStarted(false);setScreen("s1");try{localStorage.removeItem("nl_patient_v1");}catch{}}}/>
 
         {studyMode&&(
           <div style={{background:"#1E1040",borderBottom:"1px solid #7C3AED",padding:"8px 20px",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
@@ -1099,7 +1169,7 @@ export default function App() {
         )}
         {isCalcScreen&&<StepPills lang={lang} current={screen} setScreen={setScreen}/>}
         <div style={{flex:1,overflowY:screen==="s4"?"hidden":"auto",display:"flex",flexDirection:"column"}}>
-          {screen==="s1"&&isFirstRun&&<div style={{maxWidth:900,margin:"0 auto",padding:isMobile?"14px 10px 0":"22px 24px 0",width:"100%"}}><FirstRunHint isES={lang==="ES"}/></div>}
+          {screen==="s1"&&isFirstRun&&<div style={{maxWidth:900,margin:"0 auto",padding:isMobile?"14px 10px 0":"22px 24px 0",width:"100%"}}><FirstRunHint isES={lang==="ES"} onDemo={()=>{setPatientState({...DEMO_PATIENT});setCaseStarted(false);}}/></div>}
           {screen==="s1"&&<Screen1 lang={lang} state={patientState} setState={setPatientState} setScreen={setScreen} isMobile={isMobile} caseStarted={caseStarted} setCaseStarted={setCaseStarted} FREE_LIMIT={FREE_LIMIT} setCaseCount={setCaseCount} setShowUpgrade={setShowUpgrade}/>
           }
           {screen==="s2"&&<Screen2 lang={lang} state={patientState} setState={setPatientState} setScreen={setScreen} isMobile={isMobile}/>}
