@@ -61,8 +61,8 @@ export default function UpgradeModal({ isES, onClose, caseCount, freeLimit }) {
           {[
             isES ? "✓ Casos ilimitados" : "✓ Unlimited cases",
             isES ? "✓ PDF educativo + PDF Study Mode" : "✓ Educational PDF + Study Mode PDF",
-            isES ? "✓ Módulo de condiciones y alergias" : "✓ Conditions & allergies module",
-            isES ? "✓ Nutrición parenteral y enteral" : "✓ Parenteral & enteral nutrition",
+            isES ? "✓ Módulo de condiciones y alergias · Próximamente" : "✓ Conditions & allergies module · Coming soon",
+            isES ? "✓ Nutrición parenteral y enteral · Próximamente" : "✓ Parenteral & enteral nutrition · Coming soon",
             isES ? "✓ Portafolio académico" : "✓ Academic portfolio",
             isES ? "✓ Bilingüe ES / EN" : "✓ Bilingual ES / EN",
           ].map((f, i) => (
