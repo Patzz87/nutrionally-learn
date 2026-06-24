@@ -136,7 +136,7 @@ function hamwi(sex,heightIn) {
   return +(48.0+2.7*(heightIn-60)).toFixed(1);
 }
 
-function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade,setCaseStarted}) {
+function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade,setCaseStarted,onCases,casesLabel,casesCount}) {
   const {studyMode,setStudyMode} = useContext(StudyModeContext);
   return (
     <nav style={{background:"#1E2D4E",height:52,display:"flex",alignItems:"center",padding:"0 20px",gap:20,borderBottom:"0.5px solid #2D4270",position:"sticky",top:0,zIndex:200,flexShrink:0}}>
@@ -165,7 +165,7 @@ function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade,setCaseStarted
             <button key={l} onClick={()=>setLang(l)} style={{padding:"5px 10px",fontSize:12,fontWeight:500,cursor:"pointer",background:lang===l?"#2563EB":"transparent",color:lang===l?"#fff":"#93C5FD",border:"none",fontFamily:F}}>{l}</button>
           ))}
         </div>
-        <span onClick={onUpgrade} style={{fontSize:11,fontWeight:600,padding:"5px 12px",background:"#2563EB",color:"#fff",borderRadius:6,cursor:"pointer",fontFamily:F,flexShrink:0}}>Pro ↗</span>
+        {onCases&&<button onClick={onCases} style={{fontSize:12,fontWeight:500,padding:"5px 10px",borderRadius:6,background:"transparent",color:"#93C5FD",border:"0.5px solid #3A5BA0",cursor:"pointer",fontFamily:F,flexShrink:0}}>{casesLabel}{casesCount>0&&<span style={{background:"#2563EB",color:"#fff",borderRadius:10,padding:"1px 5px",fontSize:10,fontWeight:600,marginLeft:4}}>{casesCount}</span>}</button>}<span onClick={onUpgrade} style={{fontSize:11,fontWeight:600,padding:"5px 12px",background:"#2563EB",color:"#fff",borderRadius:6,cursor:"pointer",fontFamily:F,flexShrink:0}}>Pro ↗</span>
       </div>
     </nav>
   );
@@ -882,9 +882,75 @@ function Screen4({lang,isMobile}) {
 
 const LS_KEY_PATIENT="nl_patient_v1";
 const LS_KEY_STUDY="nl_study_v1";
+const LS_KEY_CASES="nl_cases_v1";
 function loadLS(key,fallback){try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback;}catch{return fallback;}}
 
 const DEFAULT_PATIENT={caseName:"",sex:"F",weightLb:145,heightIn:67,age:28,waist:89,goal:"mantener",activity:0,condition:"none",protPct:17,lipPct:30,hcPct:53,mealTimes:4,protG:67,lipG:53,hcG:210,vet:1582,geb:1479,exchanges:null};
+
+function CasesDrawer({isES, cases, onLoad, onDelete, onClose, isMobile}) {
+  return (
+    <div style={{position:"fixed",top:0,right:0,bottom:0,zIndex:2000,display:"flex"}}>
+      <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.25)"}}/>
+      <div style={{position:"relative",marginLeft:"auto",width:isMobile?"100vw":340,background:"#fff",boxShadow:"-4px 0 24px rgba(30,45,78,0.13)",display:"flex",flexDirection:"column",height:"100%"}}>
+        <div style={{padding:"16px 18px",borderBottom:"0.5px solid #D4E3FF",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
+          <div>
+            <div style={{fontSize:14,fontWeight:600,color:"#1E2D4E",fontFamily:F}}>{isES?"Casos guardados":"Saved cases"}</div>
+            <div style={{fontSize:11,color:"#3A5BA0",fontFamily:F,marginTop:2}}>{cases.length} {isES?"caso(s)":"case(s)"}</div>
+          </div>
+          <button onClick={onClose} style={{border:"none",background:"#F5F7FF",borderRadius:6,padding:"6px 10px",cursor:"pointer",fontSize:14,color:"#3A5BA0"}}>✕</button>
+        </div>
+        <div style={{flex:1,overflowY:"auto",padding:"12px"}}>
+          {cases.length===0 && (
+            <div style={{textAlign:"center",padding:"40px 20px",color:"#3A5BA0",fontSize:13,fontFamily:F}}>
+              {isES?"Aun no hay casos guardados.":"No saved cases yet."}
+            </div>
+          )}
+          {cases.map((c,i)=>(
+            <div key={c.id} style={{background:"#F5F7FF",border:"0.5px solid #D4E3FF",borderRadius:10,padding:"13px 14px",marginBottom:8}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
+                <div>
+                  <div style={{fontSize:13,fontWeight:600,color:"#1E2D4E",fontFamily:F}}>{c.name||"—"}</div>
+                  <div style={{fontSize:10,color:"#3A5BA0",fontFamily:F,marginTop:2}}>{c.date}</div>
+                </div>
+                <button onClick={()=>onDelete(c.id)} style={{border:"none",background:"transparent",cursor:"pointer",fontSize:12,color:"#CBD5E1",padding:"2px 4px"}}>✕</button>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,marginBottom:10}}>
+                {[{l:"VET",v:c.vet+" kcal"},{l:isES?"Sexo":"Sex",v:c.sex==="F"?(isES?"Fem":"F"):(isES?"Masc":"M")},{l:isES?"Objetivo":"Goal",v:c.goal==="bajar"?(isES?"Bajar":"Lose"):c.goal==="subir"?(isES?"Subir":"Gain"):(isES?"Mantener":"Maintain")}].map(kv=>(
+                  <div key={kv.l} style={{background:"#fff",borderRadius:6,padding:"6px 8px",border:"0.5px solid #D4E3FF"}}>
+                    <div style={{fontSize:9,color:"#3A5BA0",fontFamily:F,textTransform:"uppercase",letterSpacing:"0.05em"}}>{kv.l}</div>
+                    <div style={{fontSize:11,fontWeight:600,color:"#1E2D4E",fontFamily:F,marginTop:2}}>{kv.v}</div>
+                  </div>
+                ))}
+              </div>
+              <button onClick={()=>onLoad(c)} style={{width:"100%",padding:"8px 0",borderRadius:7,background:"#2563EB",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:F}}>
+                {isES?"Cargar caso":"Load case"}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FirstRunHint({isES}) {
+  return (
+    <div style={{background:"linear-gradient(135deg,#EFF6FF,#F5F7FF)",border:"0.5px solid #D4E3FF",borderRadius:12,padding:"16px 18px",marginBottom:16}}>
+      <div style={{fontSize:12,fontWeight:600,color:"#1E2D4E",fontFamily:F,marginBottom:10}}>{isES?"Como funciona Nutrionally Learn":"How Nutrionally Learn works"}</div>
+      <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+        {[{n:"1",l:isES?"Ingresa los datos del paciente":"Enter patient data",c:"#2563EB"},{n:"2",l:isES?"Revisa macronutrientes":"Review macronutrients",c:"#3A5BA0"},{n:"3",l:isES?"Arma el plan de intercambios":"Build exchange plan",c:"#0C447C"},{n:"4",l:isES?"Exporta el PDF educativo":"Export educational PDF",c:"#1E2D4E"}].map((step,i)=>(
+          <div key={step.n} style={{display:"flex",alignItems:"center",gap:6}}>
+            <div style={{display:"flex",alignItems:"center",gap:6,background:"#fff",border:`0.5px solid ${step.c}22`,borderRadius:20,padding:"4px 10px 4px 4px"}}>
+              <div style={{width:20,height:20,borderRadius:"50%",background:step.c,color:"#fff",fontSize:10,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{step.n}</div>
+              <span style={{fontSize:11,color:"#1E2D4E",fontFamily:F,fontWeight:500}}>{step.l}</span>
+            </div>
+            {i<3&&<span style={{fontSize:11,color:"#D4E3FF"}}>→</span>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   const [lang,setLang]=useState("ES");
@@ -898,6 +964,17 @@ export default function App() {
   const [patientState,setPatientStateRaw]=useState(()=>loadLS(LS_KEY_PATIENT,DEFAULT_PATIENT));
 
   function setStudyMode(val){setStudyModeRaw(val);try{localStorage.setItem(LS_KEY_STUDY,JSON.stringify(val));}catch{}}
+  const [savedCases,setSavedCasesRaw]=useState(()=>loadLS(LS_KEY_CASES,[]));
+  const [showCases,setShowCases]=useState(false);
+  function setSavedCases(val){setSavedCasesRaw(val);try{localStorage.setItem(LS_KEY_CASES,JSON.stringify(val));}catch{}}
+  function saveCurrentCase(){
+    if(!patientState.caseName) return;
+    const entry={id:Date.now(),name:patientState.caseName,date:new Date().toLocaleDateString("es-ES",{year:"numeric",month:"short",day:"numeric"}),sex:patientState.sex,vet:patientState.vet,goal:patientState.goal,snapshot:{...patientState}};
+    setSavedCases([entry,...savedCases.filter(c=>c.name!==patientState.caseName).slice(0,19)]);
+  }
+  function loadCase(c){setPatientState(c.snapshot);setShowCases(false);}
+  function deleteCase(id){setSavedCases(savedCases.filter(c=>c.id!==id));}
+  const isFirstRun = savedCases.length===0 && caseCount===0;
   function setPatientState(updater){setPatientStateRaw(prev=>{const next=typeof updater==="function"?updater(prev):updater;try{localStorage.setItem(LS_KEY_PATIENT,JSON.stringify(next));}catch{}return next;});}
 
   useEffect(()=>{const check=()=>setIsMobile(window.innerWidth<768);check();window.addEventListener("resize",check);return()=>window.removeEventListener("resize",check);},[]);
@@ -908,7 +985,8 @@ export default function App() {
     <StudyModeContext.Provider value={{studyMode,setStudyMode}}>
       <div style={{fontFamily:F,background:"#F5F7FF",minHeight:"100vh",display:"flex",flexDirection:"column"}}>
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
-        <Navbar lang={lang} setLang={setLang} screen={screen} setScreen={setScreen} isMobile={isMobile} onUpgrade={()=>setShowUpgrade(true)} setCaseStarted={setCaseStarted}/>
+        <Navbar lang={lang} setLang={setLang} screen={screen} setScreen={setScreen} isMobile={isMobile} onUpgrade={()=>setShowUpgrade(true)} setCaseStarted={setCaseStarted}onCases={()=>{saveCurrentCase();setShowCases(true);}} casesLabel={lang==="ES"?"Casos":"Cases"} casesCount={savedCases.length}/>
+
         {studyMode&&(
           <div style={{background:"#1E1040",borderBottom:"1px solid #7C3AED",padding:"8px 20px",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
             <span style={{fontSize:13}}>◎</span>
@@ -918,12 +996,15 @@ export default function App() {
         )}
         {isCalcScreen&&<StepPills lang={lang} current={screen} setScreen={setScreen}/>}
         <div style={{flex:1,overflowY:screen==="s4"?"hidden":"auto",display:"flex",flexDirection:"column"}}>
-          {screen==="s1"&&<Screen1 lang={lang} state={patientState} setState={setPatientState} setScreen={setScreen} isMobile={isMobile} caseStarted={caseStarted} setCaseStarted={setCaseStarted} FREE_LIMIT={FREE_LIMIT} setCaseCount={setCaseCount} setShowUpgrade={setShowUpgrade}/>}
+          {screen==="s1"&&isFirstRun&&<div style={{maxWidth:900,margin:"0 auto",padding:isMobile?"14px 10px 0":"22px 24px 0",width:"100%"}}><FirstRunHint isES={lang==="ES"}/></div>}
+          {screen==="s1"&&<Screen1 lang={lang} state={patientState} setState={setPatientState} setScreen={setScreen} isMobile={isMobile} caseStarted={caseStarted} setCaseStarted={setCaseStarted} FREE_LIMIT={FREE_LIMIT} setCaseCount={setCaseCount} setShowUpgrade={setShowUpgrade}/>
+          }
           {screen==="s2"&&<Screen2 lang={lang} state={patientState} setState={setPatientState} setScreen={setScreen} isMobile={isMobile}/>}
           {screen==="s3"&&<Screen3Wrapper lang={lang} state={patientState} setScreen={setScreen} studyMode={studyMode}/>}
           {screen==="s4"&&<Screen4 lang={lang} isMobile={isMobile}/>}
         </div>
       </div>
+    {showCases&&<CasesDrawer isES={lang==="ES"} cases={savedCases} onLoad={loadCase} onDelete={deleteCase} onClose={()=>setShowCases(false)} isMobile={isMobile}/>}
     {showUpgrade&&<UpgradeModal isES={lang==="ES"} onClose={()=>setShowUpgrade(false)} caseCount={caseCount} freeLimit={FREE_LIMIT}/>}
     </StudyModeContext.Provider>
   );
