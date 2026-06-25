@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, createContext, useContext } from "react";
+import React, { useState, useEffect, useMemo, createContext, useContext, useRef } from "react";
 
 const StudyModeContext = createContext({ studyMode: false, setStudyMode: () => {} });
 const F = "Plus Jakarta Sans, sans-serif";
@@ -218,10 +218,12 @@ function Screen1({lang,state,setState,setScreen,isMobile,caseStarted,setCaseStar
   const inp={background:"#EFF6FF",border:"1px solid #2563EB",borderRadius:6,padding:"8px 12px",fontFamily:F,fontWeight:600,fontSize:14,color:"#1E2D4E",width:"100%",boxSizing:"border-box",outline:"none"};
 
   function Stepper({val,onCh,min=1}) {
+    const ref=useRef(null);
+    useEffect(()=>{if(ref.current&&document.activeElement!==ref.current)ref.current.value=String(val);},[val]);
     return (
       <div style={{display:"flex",alignItems:"center",gap:8}}>
-        <button onClick={()=>onCh(Math.max(min,val-1))} style={{width:32,height:32,borderRadius:6,border:"0.5px solid #3A5BA0",background:"#F5F7FF",color:"#2563EB",fontSize:18,fontWeight:600,cursor:"pointer",fontFamily:F,flexShrink:0}}>−</button>
-        <div style={{flex:1,background:"#EFF6FF",border:"1px solid #2563EB",borderRadius:6,padding:"7px 12px",fontFamily:F,fontWeight:600,fontSize:14,color:"#1E2D4E",textAlign:"center",minWidth:50}}>{val}</div>
+        <button onClick={()=>{const n=Math.max(min,val-1);onCh(n);if(ref.current)ref.current.value=String(n);}} style={{width:32,height:32,borderRadius:6,border:"0.5px solid #3A5BA0",background:"#F5F7FF",color:"#2563EB",fontSize:18,fontWeight:600,cursor:"pointer",fontFamily:F,flexShrink:0}}>−</button>
+        <input ref={ref} type="number" defaultValue={val} onChange={e=>{const v=parseInt(e.target.value);if(!isNaN(v)&&v>=min)onCh(v);}} style={{flex:1,background:"#EFF6FF",border:"1px solid #2563EB",borderRadius:6,padding:"7px 12px",fontFamily:F,fontWeight:600,fontSize:14,color:"#1E2D4E",textAlign:"center",minWidth:50,width:"100%",outline:"none"}}/>
         <button onClick={()=>onCh(val+1)} style={{width:32,height:32,borderRadius:6,border:"0.5px solid #3A5BA0",background:"#F5F7FF",color:"#2563EB",fontSize:18,fontWeight:600,cursor:"pointer",fontFamily:F,flexShrink:0}}>+</button>
       </div>
     );
@@ -1142,7 +1144,7 @@ export default function App() {
   }
   function loadCase(c){setPatientState(c.snapshot);setShowCases(false);}
   function deleteCase(id){setSavedCases(savedCases.filter(c=>c.id!==id));}
-  const isFirstRun = savedCases.length===0 && caseCount===0;
+  const isFirstRun = savedCases.length===0;
   function setPatientState(updater){setPatientStateRaw(prev=>{const next=typeof updater==="function"?updater(prev):updater;try{localStorage.setItem(LS_KEY_PATIENT,JSON.stringify(next));}catch{}return next;});}
 
   useEffect(()=>{const check=()=>setIsMobile(window.innerWidth<768);check();window.addEventListener("resize",check);return()=>window.removeEventListener("resize",check);},[]);
@@ -1153,7 +1155,7 @@ export default function App() {
     <StudyModeContext.Provider value={{studyMode,setStudyMode}}>
       <div style={{fontFamily:F,background:"#F5F7FF",minHeight:"100vh",display:"flex",flexDirection:"column"}}>
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
-        <Navbar lang={lang} setLang={setLang} screen={screen} setScreen={setScreen} isMobile={isMobile} onUpgrade={()=>setShowUpgrade(true)} setCaseStarted={setCaseStarted}onCases={()=>{saveCurrentCase();setShowCases(true);}} casesLabel={lang==="ES"?"Casos":"Cases"} casesCount={savedCases.length} onNewCase={()=>{setPatientState({...DEFAULT_PATIENT});setCaseStarted(false);setScreen("s1");try{localStorage.removeItem("nl_patient_v1");}catch{}}}/>
+        <Navbar lang={lang} setLang={setLang} screen={screen} setScreen={setScreen} isMobile={isMobile} setCaseStarted={setCaseStarted}onCases={()=>{saveCurrentCase();setShowCases(true);}} casesLabel={lang==="ES"?"Casos":"Cases"} casesCount={savedCases.length} onNewCase={()=>{setPatientState({...DEFAULT_PATIENT});setCaseStarted(false);setScreen("s1");try{localStorage.removeItem("nl_patient_v1");}catch{}}}/>
 
         {studyMode&&(
           <div style={{background:"#1E1040",borderBottom:"1px solid #7C3AED",padding:"8px 20px",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
@@ -1173,7 +1175,7 @@ export default function App() {
         </div>
       </div>
     {showCases&&<CasesDrawer isES={lang==="ES"} cases={savedCases} onLoad={loadCase} onDelete={deleteCase} onClose={()=>setShowCases(false)} onPortfolio={()=>{setShowCases(false);setShowPortfolio(true);}} isMobile={isMobile}/>}
-    {showPortfolio&&<PortfolioModal isES={lang==="ES"} cases={savedCases} onClose={()=>setShowPortfolio(false)} onUpgrade={()=>{setShowPortfolio(false);setShowUpgrade(true);}} isMobile={isMobile}/>}
+    {showPortfolio&&<PortfolioModal isES={lang==="ES"} cases={savedCases} onClose={()=>setShowPortfolio(false)} isMobile={isMobile}/>}
     </StudyModeContext.Provider>
   );
 }
