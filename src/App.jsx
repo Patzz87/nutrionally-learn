@@ -233,7 +233,7 @@ function Screen1({lang,state,setState,setScreen,isMobile,caseStarted,setCaseStar
       <div style={{fontSize:11,fontWeight:500,color:"#2D4270",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:12,fontFamily:F,display:"flex",alignItems:"center",gap:6}}>
         <div style={{width:6,height:6,borderRadius:"50%",background:"#2563EB"}}/>{t.results}
       </div>
-      {studyMode&&hasData&&<StudyPanel isES={lang==="ES"} patient={patient} geb={geb} vet={patient.vet||0} bmi={bmi} bs={bs} hasData={hasData} F={F}/>}
+      {studyMode&&hasData&&<StudyPanel isES={lang==="ES"} patient={state} geb={geb} vet={state.vet||0} bmi={bmi} bs={bs} hasData={hasData} F={F}/>}
       {[{label:t.bmi,value:bmi,badge:t.bmiS[bs],badgeColor:bmiC[bs]},{label:t.geb,value:geb.toLocaleString(),unit:t.kcalDay},{label:t.vet,value:vet.toLocaleString(),unit:t.kcalDay}].map(k=>(
         <div key={k.label} style={{background:"#1E2D4E",border:"0.5px solid #2D4270",borderRadius:10,padding:"11px 14px",marginBottom:8}}>
           <div style={{fontSize:9,fontWeight:500,color:"#93C5FD",textTransform:"uppercase",letterSpacing:"0.05em",fontFamily:F,marginBottom:5}}>{k.label}</div>
