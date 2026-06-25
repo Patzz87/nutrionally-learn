@@ -1,4 +1,3 @@
-import UpgradeModal from "./UpgradeModal.jsx";
 import React, { useState, useEffect, useMemo, createContext, useContext } from "react";
 
 const StudyModeContext = createContext({ studyMode: false, setStudyMode: () => {} });
@@ -165,7 +164,7 @@ function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade,setCaseStarted
             <button key={l} onClick={()=>setLang(l)} style={{padding:"5px 10px",fontSize:12,fontWeight:500,cursor:"pointer",background:lang===l?"#2563EB":"transparent",color:lang===l?"#fff":"#93C5FD",border:"none",fontFamily:F}}>{l}</button>
           ))}
         </div>
-        {onNewCase&&<button onClick={onNewCase} style={{fontSize:12,fontWeight:500,padding:"5px 10px",borderRadius:6,background:"transparent",color:"#93C5FD",border:"0.5px solid #3A5BA0",cursor:"pointer",fontFamily:F,flexShrink:0}}>{lang==="ES"?"+ Nuevo":"+ New"}</button>}{onCases&&<button onClick={onCases} style={{fontSize:12,fontWeight:500,padding:"5px 10px",borderRadius:6,background:"transparent",color:"#93C5FD",border:"0.5px solid #3A5BA0",cursor:"pointer",fontFamily:F,flexShrink:0}}>{casesLabel}{casesCount>0&&<span style={{background:"#2563EB",color:"#fff",borderRadius:10,padding:"1px 5px",fontSize:10,fontWeight:600,marginLeft:4}}>{casesCount}</span>}</button>}<span onClick={onUpgrade} style={{fontSize:11,fontWeight:600,padding:"5px 12px",background:"#2563EB",color:"#fff",borderRadius:6,cursor:"pointer",fontFamily:F,flexShrink:0}}>Pro ↗</span>
+        {onNewCase&&<button onClick={onNewCase} style={{fontSize:12,fontWeight:500,padding:"5px 10px",borderRadius:6,background:"transparent",color:"#93C5FD",border:"0.5px solid #3A5BA0",cursor:"pointer",fontFamily:F,flexShrink:0}}>{lang==="ES"?"+ Nuevo":"+ New"}</button>}{onCases&&<button onClick={onCases} style={{fontSize:12,fontWeight:500,padding:"5px 10px",borderRadius:6,background:"transparent",color:"#93C5FD",border:"0.5px solid #3A5BA0",cursor:"pointer",fontFamily:F,flexShrink:0}}>{casesLabel}{casesCount>0&&<span style={{background:"#2563EB",color:"#fff",borderRadius:10,padding:"1px 5px",fontSize:10,fontWeight:600,marginLeft:4}}>{casesCount}</span>}</button>}
       </div>
     </nav>
   );
@@ -194,7 +193,7 @@ const T1={
   EN:{title:"Case data",subtitle:"Enter patient data. Everything calculates in real time.",caseName:"Case name",caseNamePH:"E.g. Patient A — Case 3",sex:"Biological sex",female:"Female",male:"Male",weight:"Weight",height:"Height",age:"Age",waist:"Waist",years:"years",goal:"Weight goal",goals:[{key:"bajar",label:"Lose weight",kcal:"20 Kcal/kg",icon:"↓"},{key:"mantener",label:"Maintain weight",kcal:"24 Kcal/kg",icon:"→"},{key:"subir",label:"Gain weight",kcal:"28 Kcal/kg",icon:"↑"}],activity:"Activity level",activities:["Sedentary","Lightly active","Active","Very active"],condition:"Health condition (optional)",condOpts:[{key:"none",label:"None",disabled:false},{key:"dm2",label:"Type 2 Diabetes",disabled:false},{key:"obesity",label:"Obesity",disabled:false},{key:"ped",label:"Pediatric",disabled:true}],condNote:{dm2:"T2D: CHO adjusted to 47% · 5 meal times (ADA 2024)",obesity:"Obesity: Ideal Body Weight calculated using Hamwi formula"},idealWeight:"Ideal weight (Hamwi)",results:"Results",bmi:"BMI",bmiS:{bajo:"Underweight",normal:"Normal",sobre:"Overweight",obeso:"Obese"},geb:"BMR (Basal metabolic rate)",vet:"TDEE (Total daily energy)",kcalKg:"Assigned Kcal/kg",kcalDay:"kcal/day",next:"View macronutrients →",calc:"Calculated automatically",formula:"Harris-Benedict"},
 };
 
-function Screen1({lang,state,setState,setScreen,isMobile,caseStarted,setCaseStarted,FREE_LIMIT,setCaseCount,setShowUpgrade}) {
+function Screen1({lang,state,setState,setScreen,isMobile,caseStarted,setCaseStarted}) {
   const {studyMode}=useContext(StudyModeContext);
   const t=T1[lang];
   const {caseName,sex,weightLb,heightIn,age,waist,goal,activity,condition="none"}=state;
@@ -351,7 +350,7 @@ function Screen1({lang,state,setState,setScreen,isMobile,caseStarted,setCaseStar
             </div>
           </div>
           {isMobile&&<div style={{marginTop:14}}><ResultsPanel/></div>}
-          <button onClick={()=>{if(caseStarted){setScreen("s2");return;}const c=loadLS("nl_case_count_v1",0);if(c>=FREE_LIMIT){setShowUpgrade(true);}else{const n=c+1;try{localStorage.setItem("nl_case_count_v1",JSON.stringify(n));}catch{}setCaseCount(n);setCaseStarted(true);setScreen("s2");}}} style={{marginTop:14,width:"100%",padding:"13px 0",borderRadius:8,background:"#2563EB",color:"#fff",fontSize:14,fontWeight:500,border:"none",cursor:"pointer",fontFamily:F}}>{t.next}</button>
+          <button onClick={()=>{setCaseStarted(true);setScreen("s2");}} style={{marginTop:14,width:"100%",padding:"13px 0",borderRadius:8,background:"#2563EB",color:"#fff",fontSize:14,fontWeight:500,border:"none",cursor:"pointer",fontFamily:F}}>{t.next}</button>
         </div>
         {!isMobile&&<ResultsPanel/>}
       </div>
@@ -893,7 +892,7 @@ const DEFAULT_PATIENT={caseName:"",sex:"F",weightLb:0,heightIn:0,age:0,waist:0,g
 
 const DEMO_PATIENT={caseName:"Maria (Ejemplo)",sex:"F",weightLb:185,heightIn:65,age:28,waist:95,goal:"mantener",activity:1,condition:"obesity",protPct:17,lipPct:30,hcPct:53,mealTimes:4,protG:0,lipG:0,hcG:0,vet:0,geb:0,exchanges:null};
 
-function PortfolioModal({isES,cases,onClose,onUpgrade,isMobile,FREE_LIMIT}) {
+function PortfolioModal({isES,cases,onClose,isMobile}) {
   const [groupBy,setGroupBy]=React.useState("condition");
   const condLabel={"none":isES?"Normal":"Normal","dm2":"DM2","obesity":isES?"Obesidad":"Obesity"};
   const goalLabel={"bajar":isES?"Bajar peso":"Lose weight","mantener":isES?"Mantener":"Maintain","subir":isES?"Subir peso":"Gain weight"};
@@ -960,10 +959,9 @@ function PortfolioModal({isES,cases,onClose,onUpgrade,isMobile,FREE_LIMIT}) {
                 <span style={{fontSize:10,color:"#3A5BA0",background:"#F5F7FF",border:"0.5px solid #D4E3FF",borderRadius:10,padding:"1px 7px"}}>{grp.length}</span>
               </div>
               {grp.map(function(cas){
-                var locked=cas._idx>=FREE_LIMIT;
                 return (
                   <div key={cas.id} style={{position:"relative",marginBottom:6}}>
-                    <div style={{background:"#F5F7FF",border:"0.5px solid #D4E3FF",borderRadius:10,padding:"10px 12px",display:"flex",alignItems:"center",gap:10,filter:locked?"blur(3px)":"none",pointerEvents:locked?"none":"auto"}}>
+                    <div style={{background:"#F5F7FF",border:"0.5px solid #D4E3FF",borderRadius:10,padding:"10px 12px",display:"flex",alignItems:"center",gap:10,filter:"none",pointerEvents:"auto"}}>
                       <div style={{flex:1}}>
                         <div style={{fontSize:12,fontWeight:600,color:"#1E2D4E"}}>{cas.name||"—"}</div>
                         <div style={{fontSize:10,color:"#3A5BA0",marginTop:1}}>{cas.date}</div>
@@ -977,14 +975,14 @@ function PortfolioModal({isES,cases,onClose,onUpgrade,isMobile,FREE_LIMIT}) {
                         );})}
                       </div>
                     </div>
-                    {locked&&<div onClick={onUpgrade} style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",borderRadius:10}}><div style={{background:"#2563EB",color:"#fff",borderRadius:20,padding:"4px 14px",fontSize:11,fontWeight:600}}>Pro</div></div>}
+                    
                   </div>
                 );
               })}
             </div>
           );})}
         </div>
-        {cases.length>=FREE_LIMIT&&<div style={{padding:"14px 20px",borderTop:"0.5px solid #D4E3FF",background:"#F5F7FF",borderRadius:"0 0 16px 16px"}}><button onClick={onUpgrade} style={{width:"100%",padding:"11px",borderRadius:8,background:"#2563EB",color:"#fff",fontSize:13,fontWeight:500,border:"none",cursor:"pointer",fontFamily:F}}>{isES?"Desbloquear portafolio completo - Pro":"Unlock full portfolio - Pro"}</button></div>}
+        
       </div>
     </div>
   );
@@ -1128,10 +1126,7 @@ export default function App() {
   const [lang,setLang]=useState("ES");
   const [screen,setScreen]=useState("s1");
   const [isMobile,setIsMobile]=useState(false);
-  const [showUpgrade,setShowUpgrade]=useState(false);
-  const FREE_LIMIT=6;
-  const [caseCount,setCaseCount]=useState(()=>loadLS("nl_case_count_v1",0));
-  const [caseStarted,setCaseStarted]=useState(false);
+    const [caseStarted,setCaseStarted]=useState(false);
   const [studyMode,setStudyModeRaw]=useState(()=>loadLS(LS_KEY_STUDY,false));
   const [patientState,setPatientStateRaw]=useState(()=>loadLS(LS_KEY_PATIENT,DEFAULT_PATIENT));
 
@@ -1170,7 +1165,7 @@ export default function App() {
         {isCalcScreen&&<StepPills lang={lang} current={screen} setScreen={setScreen}/>}
         <div style={{flex:1,overflowY:screen==="s4"?"hidden":"auto",display:"flex",flexDirection:"column"}}>
           {screen==="s1"&&isFirstRun&&<div style={{maxWidth:900,margin:"0 auto",padding:isMobile?"14px 10px 0":"22px 24px 0",width:"100%"}}><FirstRunHint isES={lang==="ES"} onDemo={()=>{setPatientState({...DEMO_PATIENT});setCaseStarted(false);}}/></div>}
-          {screen==="s1"&&<Screen1 lang={lang} state={patientState} setState={setPatientState} setScreen={setScreen} isMobile={isMobile} caseStarted={caseStarted} setCaseStarted={setCaseStarted} FREE_LIMIT={FREE_LIMIT} setCaseCount={setCaseCount} setShowUpgrade={setShowUpgrade}/>
+          {screen==="s1"&&<Screen1 lang={lang} state={patientState} setState={setPatientState} setScreen={setScreen} isMobile={isMobile} caseStarted={caseStarted} setCaseStarted={setCaseStarted}/>
           }
           {screen==="s2"&&<Screen2 lang={lang} state={patientState} setState={setPatientState} setScreen={setScreen} isMobile={isMobile}/>}
           {screen==="s3"&&<Screen3Wrapper lang={lang} state={patientState} setScreen={setScreen} studyMode={studyMode}/>}
@@ -1178,8 +1173,7 @@ export default function App() {
         </div>
       </div>
     {showCases&&<CasesDrawer isES={lang==="ES"} cases={savedCases} onLoad={loadCase} onDelete={deleteCase} onClose={()=>setShowCases(false)} onPortfolio={()=>{setShowCases(false);setShowPortfolio(true);}} isMobile={isMobile}/>}
-    {showPortfolio&&<PortfolioModal isES={lang==="ES"} cases={savedCases} onClose={()=>setShowPortfolio(false)} onUpgrade={()=>{setShowPortfolio(false);setShowUpgrade(true);}} isMobile={isMobile} FREE_LIMIT={FREE_LIMIT}/>}
-    {showUpgrade&&<UpgradeModal isES={lang==="ES"} onClose={()=>setShowUpgrade(false)} caseCount={caseCount} freeLimit={FREE_LIMIT}/>}
+    {showPortfolio&&<PortfolioModal isES={lang==="ES"} cases={savedCases} onClose={()=>setShowPortfolio(false)} onUpgrade={()=>{setShowPortfolio(false);setShowUpgrade(true);}} isMobile={isMobile}/>}
     </StudyModeContext.Provider>
   );
 }
