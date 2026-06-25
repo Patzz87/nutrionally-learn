@@ -892,6 +892,7 @@ function loadLS(key,fallback){try{const v=localStorage.getItem(key);return v?JSO
 
 const DEFAULT_PATIENT={caseName:"",sex:"F",weightLb:0,heightIn:0,age:0,waist:0,goal:"mantener",activity:0,condition:"none",protPct:17,lipPct:30,hcPct:53,mealTimes:4,protG:0,lipG:0,hcG:0,vet:0,geb:0,exchanges:null};
 
+const DEMO_PATIENT_M={caseName:"Paciente M",sex:"M",weightLb:185,heightIn:70,age:35,waist:98,goal:"bajar",activity:1,condition:"obesity",protPct:20,lipPct:25,hcPct:55,mealTimes:4,protG:0,lipG:0,hcG:0,vet:0,geb:0};
 const DEMO_PATIENT={caseName:"Maria (Ejemplo)",sex:"F",weightLb:185,heightIn:65,age:28,waist:95,goal:"mantener",activity:1,condition:"obesity",protPct:17,lipPct:30,hcPct:53,mealTimes:4,protG:0,lipG:0,hcG:0,vet:0,geb:0,exchanges:null};
 
 function PortfolioModal({isES,cases,onClose,isMobile}) {
@@ -1041,7 +1042,7 @@ function CasesDrawer({isES, cases, onLoad, onDelete, onClose, onPortfolio, isMob
   );
 }
 
-function FirstRunHint({isES, onDemo}) {
+function FirstRunHint({isES, onDemoF, onDemoM}) {
   return (
     <div style={{background:"linear-gradient(135deg,#EFF6FF,#F5F7FF)",border:"0.5px solid #D4E3FF",borderRadius:12,padding:"16px 18px",marginBottom:16}}>
       <div style={{fontSize:12,fontWeight:600,color:"#1E2D4E",fontFamily:F,marginBottom:10}}>{isES?"Como funciona Nutrionally Learn":"How Nutrionally Learn works"}</div>
@@ -1056,7 +1057,8 @@ function FirstRunHint({isES, onDemo}) {
           </div>
         ))}
       </div>
-      {onDemo&&<button onClick={onDemo} style={{marginTop:12,padding:"8px 18px",borderRadius:8,background:"#2563EB",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Ver paciente de ejemplo":"View example patient"}</button>}
+      {onDemoF&&<button onClick={onDemoF} style={{marginTop:12,padding:"8px 18px",borderRadius:8,background:"#2563EB",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Paciente F (ejemplo)":"Female patient (example)"}</button>}
+      {onDemoM&&<button onClick={onDemoM} style={{marginTop:8,padding:"8px 16px",borderRadius:8,background:"#1E2D4E",color:"#E2E8F0",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Paciente M (ejemplo)":"Male patient (example)"}</button>}
     </div>
   );
 }
@@ -1156,17 +1158,9 @@ export default function App() {
       <div style={{fontFamily:F,background:"#F5F7FF",minHeight:"100vh",display:"flex",flexDirection:"column"}}>
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
         <Navbar lang={lang} setLang={setLang} screen={screen} setScreen={setScreen} isMobile={isMobile} setCaseStarted={setCaseStarted}onCases={()=>{saveCurrentCase();setShowCases(true);}} casesLabel={lang==="ES"?"Casos":"Cases"} casesCount={savedCases.length} onNewCase={()=>{setPatientState({...DEFAULT_PATIENT});setCaseStarted(false);setScreen("s1");try{localStorage.removeItem("nl_patient_v1");}catch{}}}/>
-
-        {studyMode&&(
-          <div style={{background:"#1E1040",borderBottom:"1px solid #7C3AED",padding:"8px 20px",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
-            <span style={{fontSize:13}}>◎</span>
-            <span style={{fontSize:12,color:"#C4B5FD",fontFamily:F,fontWeight:500}}>{lang==="ES"?"Study Mode activo — panel educativo próximamente.":"Study Mode active — educational panel coming soon."}</span>
-            <span style={{marginLeft:"auto",fontSize:10,color:"#7C3AED",fontFamily:F,background:"#2D1B69",padding:"2px 8px",borderRadius:20,border:"0.5px solid #7C3AED"}}>{lang==="ES"?"Fase 2":"Phase 2"}</span>
-          </div>
-        )}
         {isCalcScreen&&<StepPills lang={lang} current={screen} setScreen={setScreen}/>}
         <div style={{flex:1,overflowY:screen==="s4"?"hidden":"auto",display:"flex",flexDirection:"column"}}>
-          {screen==="s1"&&isFirstRun&&<div style={{maxWidth:900,margin:"0 auto",padding:isMobile?"14px 10px 0":"22px 24px 0",width:"100%"}}><FirstRunHint isES={lang==="ES"} onDemo={()=>{setPatientState({...DEMO_PATIENT});setCaseStarted(false);}}/></div>}
+          {screen==="s1"&&isFirstRun&&<div style={{maxWidth:900,margin:"0 auto",padding:isMobile?"14px 10px 0":"22px 24px 0",width:"100%"}}><FirstRunHint isES={lang==="ES"} onDemoF={()=>{setPatientState({...DEMO_PATIENT});setCaseStarted(false);}} onDemoM={()=>{setPatientState({...DEMO_PATIENT_M});setCaseStarted(false);}}/></div>}
           {screen==="s1"&&<Screen1 lang={lang} state={patientState} setState={setPatientState} setScreen={setScreen} isMobile={isMobile} caseStarted={caseStarted} setCaseStarted={setCaseStarted}/>
           }
           {screen==="s2"&&<Screen2 lang={lang} state={patientState} setState={setPatientState} setScreen={setScreen} isMobile={isMobile}/>}
