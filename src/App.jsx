@@ -136,7 +136,7 @@ function hamwi(sex,heightIn) {
   return +(48.0+2.7*(heightIn-60)).toFixed(1);
 }
 
-function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade,setCaseStarted,onCases,casesLabel,casesCount,onNewCase}) {
+function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade,setCaseStarted,onCases,casesLabel,casesCount,onNewCase,onExportPDF}) {
   const {studyMode,setStudyMode} = useContext(StudyModeContext);
   return (
     <nav style={{background:"#1E2D4E",height:52,display:"flex",alignItems:"center",padding:"0 20px",gap:20,borderBottom:"0.5px solid #2D4270",position:"sticky",top:0,zIndex:200,flexShrink:0}}>
@@ -172,7 +172,7 @@ function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade,setCaseStarted
   );
 }
 
-function StepPills({lang,current,setScreen}) {
+function StepPills({lang,current,setScreen,onExportPDF}) {
   const steps=[{id:"s1",label:{ES:"Datos",EN:"Data"}},{id:"s2",label:{ES:"Macros",EN:"Macros"}},{id:"s3",label:{ES:"Intercambios",EN:"Exchanges"}}];
   const idx=steps.findIndex(s=>s.id===current);
   return (
@@ -185,7 +185,7 @@ function StepPills({lang,current,setScreen}) {
           <span style={{fontSize:11,color:"#D4E3FF",flexShrink:0}}>→</span>
         </div>
       ))}
-      <button onClick={()=>generatePDF(patientState,lang)} style={{fontSize:11,padding:"4px 14px",borderRadius:20,fontWeight:500,fontFamily:F,background:"#2A9D8F",color:"#fff",border:"none",cursor:"pointer",flexShrink:0,whiteSpace:"nowrap"}}>{lang==="ES"?"⬇ PDF":"⬇ PDF"}</button>
+      <button onClick={onExportPDF} style={{fontSize:11,padding:"4px 14px",borderRadius:20,fontWeight:500,fontFamily:F,background:"#2A9D8F",color:"#fff",border:"none",cursor:"pointer",flexShrink:0,whiteSpace:"nowrap"}}>{lang==="ES"?"⬇ PDF":"⬇ PDF"}</button>
     </div>
   );
 }
@@ -1770,8 +1770,8 @@ export default function App() {
     <StudyModeContext.Provider value={{studyMode,setStudyMode}}>
       <div style={{fontFamily:F,background:"#F5F7FF",minHeight:"100vh",display:"flex",flexDirection:"column"}}>
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
-        <Navbar lang={lang} setLang={setLang} screen={screen} setScreen={setScreen} isMobile={isMobile} setCaseStarted={setCaseStarted}onCases={()=>{saveCurrentCase();setShowCases(true);}} casesLabel={lang==="ES"?"Casos":"Cases"} casesCount={savedCases.length} onNewCase={()=>{setPatientState({...DEFAULT_PATIENT});setCaseStarted(false);setScreen("s1");try{localStorage.removeItem("nl_patient_v1");}catch{}}}/>
-        {isCalcScreen&&<StepPills lang={lang} current={screen} setScreen={setScreen}/>}
+        <Navbar lang={lang} setLang={setLang} screen={screen} setScreen={setScreen} isMobile={isMobile} setCaseStarted={setCaseStarted}onCases={()=>{saveCurrentCase();setShowCases(true);}} casesLabel={lang==="ES"?"Casos":"Cases"} casesCount={savedCases.length} onNewCase={()=>{setPatientState({...DEFAULT_PATIENT});setCaseStarted(false);setScreen("s1");try{localStorage.removeItem("nl_patient_v1");}catch{}}} onExportPDF={()=>generatePDF(patientState,lang)}/>
+        {isCalcScreen&&<StepPills lang={lang} current={screen} setScreen={setScreen} onExportPDF={()=>generatePDF(patientState,lang)}/>}
         <div style={{flex:1,overflowY:screen==="s4"?"hidden":"auto",display:"flex",flexDirection:"column"}}>
           {screen==="s1"&&isFirstRun&&<div style={{maxWidth:900,margin:"0 auto",padding:isMobile?"14px 10px 0":"22px 24px 0",width:"100%"}}><FirstRunHint isES={lang==="ES"} onDemoF={()=>{setPatientState({...DEMO_PATIENT});setCaseStarted(false);}} onDemoM={(type)=>{
               if(type==="dm2"){setPatientState({...DEMO_PATIENT_DM2});}
