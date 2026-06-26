@@ -184,7 +184,7 @@ function StepPills({lang,current,setScreen}) {
           <span style={{fontSize:11,color:"#D4E3FF",flexShrink:0}}>→</span>
         </div>
       ))}
-      <span style={{fontSize:11,padding:"4px 14px",borderRadius:20,fontWeight:500,fontFamily:F,background:"#F5F7FF",color:"#3A5BA0",border:"0.5px solid #D4E3FF",flexShrink:0}}>{lang==="ES"?"4. Exportar":"4. Export"}</span>
+      <button onClick={()=>generatePDF(patientState,lang)} style={{fontSize:11,padding:"4px 14px",borderRadius:20,fontWeight:500,fontFamily:F,background:"#2A9D8F",color:"#fff",border:"none",cursor:"pointer",flexShrink:0,whiteSpace:"nowrap"}}>{lang==="ES"?"⬇ PDF":"⬇ PDF"}</button>
     </div>
   );
 }
@@ -1630,6 +1630,112 @@ function Screen7({lang}) {
       </div>)}
     </div>
   );
+}
+
+
+async function generatePDF(state, lang) {
+  const JsPDF = await loadJsPDF();
+  const doc = new JsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+  const isES = lang === "ES";
+  const W = 210, M = 18;
+  let y = 20;
+
+  const wkg = +(state.weightLb*0.4536).toFixed(1);
+  const hcm = +(state.heightIn*2.54).toFixed(1);
+  const kcalMap = {bajar:20,mantener:24,subir:28};
+  const vet = Math.round((kcalMap[state.goal]||24)*wkg);
+  const geb = Math.round(state.sex==="F"?(655+9.6*wkg+1.9*hcm-4.7*state.age):(66+13.8*wkg+5*hcm-6.8*state.age));
+  const hcPct = Math.max(0,100-state.protPct-state.lipPct);
+  const protG = +(vet*state.protPct/100/4).toFixed(1);
+  const lipG  = +(vet*state.lipPct/100/9).toFixed(1);
+  const hcG   = +(vet*hcPct/100/4).toFixed(1);
+
+  // Header
+  doc.setFillColor(30,45,78); doc.rect(0,0,W,14,"F");
+  doc.setFillColor(42,157,143); doc.rect(0,14,W,3,"F");
+  doc.setTextColor(255,255,255);
+  doc.setFont("helvetica","bold"); doc.setFontSize(13);
+  doc.text("Nutrionally Learn", M, 9.5);
+  doc.setFont("helvetica","normal"); doc.setFontSize(9);
+  doc.text(isES?"Plan Nutricional Clínico":"Clinical Nutrition Plan", W-M, 9.5, {align:"right"});
+  y = 26;
+
+  // Title
+  doc.setTextColor(30,45,78);
+  doc.setFont("helvetica","bold"); doc.setFontSize(16);
+  doc.text(state.caseName||(isES?"Paciente":"Patient"), M, y); y+=7;
+  doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(100,120,160);
+  doc.text(new Date().toLocaleDateString(lang==="ES"?"es-MX":"en-US",{year:"numeric",month:"long",day:"numeric"}), M, y); y+=10;
+  doc.setDrawColor(212,227,255); doc.line(M,y,W-M,y); y+=8;
+
+  // Patient data
+  doc.setFillColor(245,247,255); doc.roundedRect(M,y,W-M*2,28,3,3,"F");
+  doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(30,45,78);
+  doc.text(isES?"Datos del paciente":"Patient data", M+5, y+7);
+  doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(58,91,160);
+  const condMap={none:isES?"Sin condición":"None",obesity:isES?"Obesidad":"Obesity",dm2:isES?"Diabetes tipo 2":"Type 2 diabetes",renal:isES?"ERC":"CKD",hta:isES?"Hipertensión":"Hypertension"};
+  const goalMap={bajar:isES?"Reducción de peso":"Weight loss",mantener:isES?"Mantenimiento":"Maintenance",subir:isES?"Ganancia de peso":"Weight gain"};
+  const half = (W-M*2)/2;
+  [`${isES?"Peso":"Weight"}: ${wkg} kg`,`${isES?"Talla":"Height"}: ${hcm} cm`,`${isES?"Edad":"Age"}: ${state.age} ${isES?"años":"yrs"}`].forEach((t,i)=>doc.text(t,M+5,y+14+i*5));
+  [`${isES?"Sexo":"Sex"}: ${state.sex==="F"?(isES?"Femenino":"Female"):(isES?"Masculino":"Male")}`,`${isES?"Condición":"Condition"}: ${condMap[state.condition]||state.condition}`,`${isES?"Objetivo":"Goal"}: ${goalMap[state.goal]||state.goal}`].forEach((t,i)=>doc.text(t,M+5+half,y+14+i*5));
+  y+=34;
+
+  // Energy
+  doc.setFillColor(239,246,255); doc.roundedRect(M,y,W-M*2,22,3,3,"F");
+  doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(30,45,78);
+  doc.text(isES?"Requerimiento energético":"Energy requirement", M+5, y+7);
+  doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(58,91,160);
+  doc.text(`GEB (Harris-Benedict): ${geb} kcal/día`, M+5, y+15);
+  doc.text(`VET: ${vet} kcal/día`, M+5+half, y+15);
+  y+=28;
+
+  // Macros
+  doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(30,45,78);
+  doc.text(isES?"Distribución de macronutrientes":"Macronutrient distribution", M, y); y+=6;
+  const cW=(W-M*2)/4;
+  doc.setFillColor(30,45,78); doc.rect(M,y,W-M*2,7,"F");
+  doc.setTextColor(255,255,255); doc.setFontSize(9);
+  [isES?"Macronutriente":"Macronutrient","%","g/día","kcal"].forEach((h,i)=>doc.text(h,M+cW*i+3,y+5));
+  y+=7;
+  [[isES?"Proteínas":"Protein",`${state.protPct}%`,`${protG}g`,`${Math.round(protG*4)}`],[isES?"Lípidos":"Lipids",`${state.lipPct}%`,`${lipG}g`,`${Math.round(lipG*9)}`],[isES?"Hidratos":"Carbohydrates",`${hcPct}%`,`${hcG}g`,`${Math.round(hcG*4)}`],["Total","100%",`${Math.round(protG+lipG+hcG)}g`,`${vet}`]].forEach((row,ri)=>{
+    doc.setFillColor(ri===3?212:ri%2===0?245:255, ri===3?227:ri%2===0?247:255, ri===3?255:255);
+    doc.rect(M,y,W-M*2,7,"F");
+    doc.setTextColor(ri===3?30:58,ri===3?45:91,ri===3?78:160);
+    doc.setFont("helvetica",ri===3?"bold":"normal");
+    row.forEach((cell,i)=>doc.text(cell,M+cW*i+3,y+5));
+    y+=7;
+  });
+  y+=8;
+
+  // Exchange plan
+  const exchanges = state.exchanges;
+  if(exchanges && Object.keys(exchanges).length>0){
+    if(y>220){doc.addPage();y=20;}
+    doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(30,45,78);
+    doc.text(isES?"Plan de intercambios":"Exchange plan", M, y); y+=6;
+    Object.entries(exchanges).forEach(([meal,groups])=>{
+      if(y>265){doc.addPage();y=20;}
+      doc.setFillColor(30,45,78); doc.rect(M,y,W-M*2,7,"F");
+      doc.setTextColor(255,255,255); doc.setFont("helvetica","bold"); doc.setFontSize(9);
+      doc.text(meal, M+3, y+5); y+=7;
+      Object.entries(groups).forEach(([grp,val])=>{
+        if(!val||val===0) return;
+        if(y>270){doc.addPage();y=20;}
+        doc.setFillColor(245,247,255); doc.rect(M,y,W-M*2,6,"F");
+        doc.setTextColor(58,91,160); doc.setFont("helvetica","normal"); doc.setFontSize(8);
+        doc.text(`${grp}: ${val}`, M+5, y+4.5); y+=6;
+      });
+      y+=3;
+    });
+  }
+
+  // Footer
+  doc.setFillColor(30,45,78); doc.rect(0,287,W,10,"F");
+  doc.setTextColor(147,197,253); doc.setFontSize(7); doc.setFont("helvetica","normal");
+  doc.text("learn.nutrionally.com", M, 293.5);
+  doc.text(isES?"Uso educativo — no reemplaza criterio clínico profesional":"Educational use only — does not replace professional clinical judgment", W-M, 293.5,{align:"right"});
+
+  doc.save(`${(state.caseName||"plan").replace(/\s+/g,"_")}_nutrionally.pdf`);
 }
 
 export default function App() {
