@@ -144,7 +144,7 @@ function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade,setCaseStarted
         <span style={{fontSize:15,fontWeight:600,color:"#E2E8F0",fontFamily:F}}>nutrionally <span style={{fontWeight:400,color:"#93C5FD",fontSize:13}}>learn</span></span>
       </button>
       <a href="https://nutrionally.com" target="_blank" rel="noopener noreferrer" style={{fontSize:11,color:"#93C5FD",fontFamily:F,textDecoration:"none",padding:"3px 8px",borderRadius:6,border:"0.5px solid #3A5BA0",marginLeft:4}}>nutrionally.com ↗</a>
-      {!isMobile&&[{id:"s1",label:{ES:"Calculadora",EN:"Calculator"}},{id:"s4",label:{ES:"Lista de alimentos",EN:"Food list"}},{id:"s5",label:{ES:"Nutrición Parenteral y Enteral",EN:"Parenteral and Enteral Nutrition"}},{id:"s6",label:{ES:"Fórmulas de GEB",EN:"BMR Formulas"}},{id:"s7",label:{ES:"Balance nitrogenado",EN:"Nitrogen balance"}}].map(item=>(
+      {!isMobile&&[{id:"s1",label:{ES:"Calculadora",EN:"Calculator"}},{id:"s4",label:{ES:"Lista de alimentos",EN:"Food list"}},{id:"s5",label:{ES:"NPT / NE",EN:"PN / EN"}},{id:"s6",label:{ES:"Fórmulas GEB",EN:"GEB Formulas"}},{id:"s7",label:{ES:"Bal. nitrogenado",EN:"N Balance"}},{id:"s8",label:{ES:"Ireton-Jones",EN:"Ireton-Jones"}}].map(item=>(
         <button key={item.id} onClick={()=>setScreen(item.id)} style={{fontSize:13,fontFamily:F,background:"none",border:"none",cursor:"pointer",color:screen===item.id?"#93C5FD":"#8B949E",fontWeight:screen===item.id?500:400,borderBottom:screen===item.id?"2px solid #2563EB":"2px solid transparent",paddingBottom:2,flexShrink:0}}>{item.label[lang]}</button>
       ))}
       <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:10}}>
@@ -152,14 +152,14 @@ function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade,setCaseStarted
           {[{val:false,label:{ES:"Calculadora",EN:"Calculator"},icon:"⊞"},{val:true,label:{ES:"Study Mode",EN:"Study Mode"},icon:"◎"}].map(opt=>{
             const active=studyMode===opt.val;
             return (
-              <button key={String(opt.val)} onClick={()=>setStudyMode(opt.val)} style={{padding:isMobile?"5px 10px":"5px 14px",fontSize:11,fontWeight:500,cursor:"pointer",fontFamily:F,background:active?(opt.val?"#7C3AED":"#2563EB"):"transparent",color:active?"#fff":"#8B949E",border:"none",display:"flex",alignItems:"center",gap:5}}>
+              <button key={String(opt.val)} onClick={()=>setStudyMode(opt.val)} style={{padding:isMobile?"5px 10px":"5px 14px",fontSize:11,fontWeight:500,cursor:"pointer",fontFamily:F,background:active?(opt.val?"#7C3AED":"#2563EB"):"transparent",color:active?"#fff":"#8B949E",border:"none",display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap"}}>
                 <span style={{fontSize:12}}>{opt.icon}</span>
                 {!isMobile&&opt.label[lang]}
               </button>
             );
           })}
         </div>
-        {studyMode&&<span style={{fontSize:10,fontWeight:600,padding:"3px 9px",background:"#7C3AED22",color:"#A78BFA",borderRadius:20,border:"0.5px solid #7C3AED",fontFamily:F,flexShrink:0}}>{lang==="ES"?"Panel edu. próximamente":"Edu panel coming soon"}</span>}
+        
         <div style={{display:"flex",border:"0.5px solid #3A5BA0",borderRadius:6,overflow:"hidden"}}>
           {["ES","EN"].map(l=>(
             <button key={l} onClick={()=>setLang(l)} style={{padding:"5px 10px",fontSize:12,fontWeight:500,cursor:"pointer",background:lang===l?"#2563EB":"transparent",color:lang===l?"#fff":"#93C5FD",border:"none",fontFamily:F}}>{l}</button>
@@ -894,6 +894,9 @@ function loadLS(key,fallback){try{const v=localStorage.getItem(key);return v?JSO
 const DEFAULT_PATIENT={caseName:"",sex:"F",weightLb:0,heightIn:0,age:0,waist:0,goal:"mantener",activity:0,condition:"none",protPct:17,lipPct:30,hcPct:53,mealTimes:4,protG:0,lipG:0,hcG:0,vet:0,geb:0,exchanges:null};
 
 const DEMO_PATIENT_M={caseName:"Paciente M",sex:"M",weightLb:185,heightIn:70,age:35,waist:98,goal:"bajar",activity:1,condition:"obesity",protPct:20,lipPct:25,hcPct:55,mealTimes:4,protG:0,lipG:0,hcG:0,vet:0,geb:0};
+const DEMO_PATIENT_DM2={caseName:"Carlos — DM2",sex:"M",weightLb:198,heightIn:67,age:52,waist:105,goal:"bajar",activity:1,condition:"dm2",protPct:20,lipPct:30,hcPct:50,mealTimes:4,protG:0,lipG:0,hcG:0,vet:0,geb:0,exchanges:null};
+const DEMO_PATIENT_ERC={caseName:"Elena — ERC",sex:"F",weightLb:154,heightIn:63,age:65,waist:92,goal:"mantener",activity:1,condition:"renal",protPct:10,lipPct:35,hcPct:55,mealTimes:4,protG:0,lipG:0,hcG:0,vet:0,geb:0,exchanges:null};
+const DEMO_PATIENT_OB={caseName:"Roberto — Obesidad",sex:"M",weightLb:264,heightIn:69,age:44,waist:118,goal:"bajar",activity:1,condition:"obesity",protPct:25,lipPct:30,hcPct:45,mealTimes:5,protG:0,lipG:0,hcG:0,vet:0,geb:0,exchanges:null};
 const DEMO_PATIENT={caseName:"Maria (Ejemplo)",sex:"F",weightLb:185,heightIn:65,age:28,waist:95,goal:"mantener",activity:1,condition:"obesity",protPct:17,lipPct:30,hcPct:53,mealTimes:4,protG:0,lipG:0,hcG:0,vet:0,geb:0,exchanges:null};
 
 function PortfolioModal({isES,cases,onClose,isMobile}) {
@@ -1059,7 +1062,10 @@ function FirstRunHint({isES, onDemoF, onDemoM}) {
         ))}
       </div>
       {onDemoF&&<button onClick={onDemoF} style={{marginTop:12,padding:"8px 18px",borderRadius:8,background:"#2563EB",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Paciente F (ejemplo)":"Female patient (example)"}</button>}
-      {onDemoM&&<button onClick={onDemoM} style={{marginTop:8,padding:"8px 16px",borderRadius:8,background:"#1E2D4E",color:"#E2E8F0",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Paciente M (ejemplo)":"Male patient (example)"}</button>}
+      {onDemoM&&<button onClick={()=>onDemoM()} style={{marginTop:8,padding:"8px 16px",borderRadius:8,background:"#1E2D4E",color:"#E2E8F0",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Paciente M (ejemplo)":"Male patient (example)"}</button>}
+      {onDemoM&&<button onClick={()=>onDemoM("dm2")} style={{marginTop:8,padding:"8px 16px",borderRadius:8,background:"#7C3AED",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Carlos — DM2 (ejemplo)":"Carlos — T2D (example)"}</button>}
+      {onDemoM&&<button onClick={()=>onDemoM("erc")} style={{marginTop:8,padding:"8px 16px",borderRadius:8,background:"#0F6E56",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Elena — ERC (ejemplo)":"Elena — CKD (example)"}</button>}
+      {onDemoM&&<button onClick={()=>onDemoM("ob")} style={{marginTop:8,padding:"8px 16px",borderRadius:8,background:"#B45309",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Roberto — Obesidad (ejemplo)":"Roberto — Obesity (example)"}</button>}
     </div>
   );
 }
@@ -1328,6 +1334,113 @@ function StudyPanel({isES, patient, geb, vet, bmi, bs, hasData, F}) {
   );
 }
 
+
+function Screen8({lang}) {
+  const isES = lang === "ES";
+  const F = "Plus Jakarta Sans, sans-serif";
+  const TEAL = "#2A9D8F";
+  const NAVY = "#1E2D4E";
+  const BLUE = "#2563EB";
+  const [tab, setTab] = React.useState("spontaneous");
+  const [weight, setWeight] = React.useState("");
+  const [height, setHeight] = React.useState("");
+  const [age, setAge] = React.useState("");
+  const [sex, setSex] = React.useState("F");
+  const [obese, setObese] = React.useState(false);
+  const [trauma, setTrauma] = React.useState(false);
+  const [burn, setBurn] = React.useState(false);
+  const [ventilated, setVentilated] = React.useState(false);
+
+  const w=parseFloat(weight), h=parseFloat(height), a=parseInt(age);
+
+  const inputStyle = {width:"100%",padding:"8px 12px",borderRadius:8,border:"0.5px solid #D4E3FF",background:"#fff",color:NAVY,fontSize:13,fontFamily:F,outline:"none",boxSizing:"border-box"};
+  const labelStyle = {fontSize:11,color:"#3A5BA0",fontFamily:F,display:"block",marginBottom:4};
+  const resultBox = (label,value,unit,color=TEAL) => (
+    <div style={{background:"#F5F7FF",borderRadius:8,padding:"10px 14px",marginBottom:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+      <span style={{fontSize:12,color:NAVY,fontFamily:F}}>{label}</span>
+      <span style={{fontSize:15,fontWeight:500,color,fontFamily:F}}>{value} <span style={{fontSize:11}}>{unit}</span></span>
+    </div>
+  );
+
+  // Ireton-Jones 1992 (spontaneous breathing)
+  // EEE = 629 - 11(A) + 25(W) - 609(O)
+  // Ireton-Jones 1992 (ventilated)
+  // EEE = 1784 - 11(A) + 5(W) + 244(S) + 239(T) + 804(B)
+  // S: sex (M=1, F=0), T: trauma (1/0), B: burn (1/0), O: obese (1/0)
+
+  let result = null;
+  if (w && a) {
+    const S = sex === "M" ? 1 : 0;
+    const O = obese ? 1 : 0;
+    const T = trauma ? 1 : 0;
+    const B = burn ? 1 : 0;
+    if (tab === "spontaneous") {
+      result = Math.round(629 - 11*a + 25*w - 609*O);
+    } else {
+      result = Math.round(1784 - 11*a + 5*w + 244*S + 239*T + 804*B);
+    }
+  }
+
+  return (
+    <div style={{padding:"24px",maxWidth:700,margin:"0 auto"}}>
+      <div style={{fontSize:11,fontWeight:500,color:TEAL,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:6,fontFamily:F}}>{isES?"Fórmulas de GEB / GET":"BMR / TEE Formulas"}</div>
+      <div style={{fontSize:20,fontWeight:500,color:NAVY,marginBottom:4,fontFamily:F}}>Ireton-Jones (1992)</div>
+      <div style={{fontSize:12,color:"#3A5BA0",marginBottom:20,fontFamily:F}}>{isES?"Estimación de gasto energético en pacientes hospitalizados":"Energy expenditure estimation in hospitalized patients"}</div>
+
+      <div style={{background:"#EFF6FF",borderRadius:10,padding:16,marginBottom:16,fontSize:12,color:"#3A5BA0",fontFamily:F}}>
+        <strong style={{color:BLUE}}>{isES?"Respiración espontánea":"Spontaneous breathing"}</strong><br/>
+        <span style={{color:NAVY}}>EEE = 629 − 11(edad) + 25(peso kg) − 609(obesidad)</span><br/><br/>
+        <strong style={{color:BLUE}}>{isES?"Ventilación mecánica":"Mechanical ventilation"}</strong><br/>
+        <span style={{color:NAVY}}>EEE = 1784 − 11(edad) + 5(peso kg) + 244(sexo M) + 239(trauma) + 804(quemadura)</span><br/><br/>
+        <span style={{color:"#8B949E"}}>{isES?"Variables dicotómicas: 1=sí, 0=no":"Dichotomous variables: 1=yes, 0=no"}</span>
+      </div>
+
+      <div style={{display:"flex",gap:8,marginBottom:20}}>
+        {[{id:"spontaneous",es:"Respiración espontánea",en:"Spontaneous breathing"},{id:"ventilated",es:"Ventilación mecánica",en:"Mechanical ventilation"}].map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"7px 16px",borderRadius:20,border:"0.5px solid #2A3F5F",background:tab===t.id?TEAL:"transparent",color:tab===t.id?"#fff":"#8B949E",fontSize:12,fontFamily:F,cursor:"pointer"}}>{isES?t.es:t.en}</button>
+        ))}
+      </div>
+
+      <div style={{display:"flex",gap:8,marginBottom:12}}>
+        {["F","M"].map(s=>(<button key={s} onClick={()=>setSex(s)} style={{padding:"6px 14px",borderRadius:20,border:"0.5px solid #2A3F5F",background:sex===s?BLUE:"transparent",color:sex===s?"#fff":"#8B949E",fontSize:12,fontFamily:F,cursor:"pointer"}}>{s==="F"?(isES?"Femenino":"Female"):(isES?"Masculino":"Male")}</button>))}
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
+        <div><label style={labelStyle}>{isES?"Peso (kg)":"Weight (kg)"}</label><input type="number" value={weight} onChange={e=>setWeight(e.target.value)} style={inputStyle}/></div>
+        <div><label style={labelStyle}>{isES?"Edad (años)":"Age (years)"}</label><input type="number" value={age} onChange={e=>setAge(e.target.value)} style={inputStyle}/></div>
+      </div>
+
+      <div style={{display:"flex",flexWrap:"wrap",gap:10,marginBottom:16}}>
+        {tab==="spontaneous"&&(
+          <label style={{display:"flex",alignItems:"center",gap:6,fontSize:12,color:NAVY,fontFamily:F,cursor:"pointer"}}>
+            <input type="checkbox" checked={obese} onChange={e=>setObese(e.target.checked)} style={{accentColor:TEAL}}/>
+            {isES?"Obesidad (IMC > 30)":"Obesity (BMI > 30)"}
+          </label>
+        )}
+        {tab==="ventilated"&&(<>
+          <label style={{display:"flex",alignItems:"center",gap:6,fontSize:12,color:NAVY,fontFamily:F,cursor:"pointer"}}>
+            <input type="checkbox" checked={trauma} onChange={e=>setTrauma(e.target.checked)} style={{accentColor:TEAL}}/>
+            {isES?"Trauma":"Trauma"}
+          </label>
+          <label style={{display:"flex",alignItems:"center",gap:6,fontSize:12,color:NAVY,fontFamily:F,cursor:"pointer"}}>
+            <input type="checkbox" checked={burn} onChange={e=>setBurn(e.target.checked)} style={{accentColor:TEAL}}/>
+            {isES?"Quemadura":"Burn"}
+          </label>
+        </>)}
+      </div>
+
+      {result!==null&&(<div style={{marginTop:12}}>
+        {resultBox(isES?"Gasto energético estimado (Ireton-Jones)":"Estimated energy expenditure (Ireton-Jones)", result.toLocaleString(), "kcal/día", "#F4C542")}
+        <div style={{fontSize:11,color:"#8B949E",fontFamily:F,padding:"8px 12px",background:"#F5F7FF",borderRadius:6,marginTop:4}}>
+          {isES
+            ? "Referencia: Ireton-Jones CS, et al. Equations for the estimation of energy expenditures in patients with burns. J Burn Care Rehabil. 1992."
+            : "Reference: Ireton-Jones CS, et al. Equations for the estimation of energy expenditures in patients with burns. J Burn Care Rehabil. 1992."}
+        </div>
+      </div>)}
+    </div>
+  );
+}
+
 function Screen6({lang}) {
   const isES = lang === "ES";
   const F = "Plus Jakarta Sans, sans-serif";
@@ -1552,7 +1665,12 @@ export default function App() {
         <Navbar lang={lang} setLang={setLang} screen={screen} setScreen={setScreen} isMobile={isMobile} setCaseStarted={setCaseStarted}onCases={()=>{saveCurrentCase();setShowCases(true);}} casesLabel={lang==="ES"?"Casos":"Cases"} casesCount={savedCases.length} onNewCase={()=>{setPatientState({...DEFAULT_PATIENT});setCaseStarted(false);setScreen("s1");try{localStorage.removeItem("nl_patient_v1");}catch{}}}/>
         {isCalcScreen&&<StepPills lang={lang} current={screen} setScreen={setScreen}/>}
         <div style={{flex:1,overflowY:screen==="s4"?"hidden":"auto",display:"flex",flexDirection:"column"}}>
-          {screen==="s1"&&isFirstRun&&<div style={{maxWidth:900,margin:"0 auto",padding:isMobile?"14px 10px 0":"22px 24px 0",width:"100%"}}><FirstRunHint isES={lang==="ES"} onDemoF={()=>{setPatientState({...DEMO_PATIENT});setCaseStarted(false);}} onDemoM={()=>{setPatientState({...DEMO_PATIENT_M});setCaseStarted(false);}}/></div>}
+          {screen==="s1"&&isFirstRun&&<div style={{maxWidth:900,margin:"0 auto",padding:isMobile?"14px 10px 0":"22px 24px 0",width:"100%"}}><FirstRunHint isES={lang==="ES"} onDemoF={()=>{setPatientState({...DEMO_PATIENT});setCaseStarted(false);}} onDemoM={(type)=>{
+              if(type==="dm2"){setPatientState({...DEMO_PATIENT_DM2});}
+              else if(type==="erc"){setPatientState({...DEMO_PATIENT_ERC});}
+              else if(type==="ob"){setPatientState({...DEMO_PATIENT_OB});}
+              else{setPatientState({...DEMO_PATIENT_M});}
+              setCaseStarted(false);}}/></div>}
           {screen==="s1"&&<Screen1 lang={lang} state={patientState} setState={setPatientState} setScreen={setScreen} isMobile={isMobile} caseStarted={caseStarted} setCaseStarted={setCaseStarted}/>
           }
           {screen==="s2"&&<Screen2 lang={lang} state={patientState} setState={setPatientState} setScreen={setScreen} isMobile={isMobile}/>}
@@ -1561,6 +1679,7 @@ export default function App() {
           {screen==="s5"&&<Screen5 lang={lang}/>}
       {screen==="s6"&&<Screen6 lang={lang}/>}
       {screen==="s7"&&<Screen7 lang={lang}/>}
+      {screen==="s8"&&<Screen8 lang={lang}/>}
         </div>
       </div>
     {showCases&&<CasesDrawer isES={lang==="ES"} cases={savedCases} onLoad={loadCase} onDelete={deleteCase} onClose={()=>setShowCases(false)} onPortfolio={()=>{setShowCases(false);setShowPortfolio(true);}} isMobile={isMobile}/>}
