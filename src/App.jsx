@@ -143,7 +143,7 @@ function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade,setCaseStarted
         <div style={{width:8,height:8,borderRadius:"50%",background:"#2563EB"}}/>
         <span style={{fontSize:15,fontWeight:600,color:"#E2E8F0",fontFamily:F}}>nutrionally <span style={{fontWeight:400,color:"#93C5FD",fontSize:13}}>learn</span></span>
       </button>
-      {!isMobile&&[{id:"s1",label:{ES:"Calculadora",EN:"Calculator"}},{id:"s4",label:{ES:"Lista de alimentos",EN:"Food list"}}].map(item=>(
+      {!isMobile&&[{id:"s1",label:{ES:"Calculadora",EN:"Calculator"}},{id:"s4",label:{ES:"Lista de alimentos",EN:"Food list"}},{id:"s5",label:{ES:"NPT / NE",EN:"NPT / EN"}}].map(item=>(
         <button key={item.id} onClick={()=>setScreen(item.id)} style={{fontSize:13,fontFamily:F,background:"none",border:"none",cursor:"pointer",color:screen===item.id?"#93C5FD":"#8B949E",fontWeight:screen===item.id?500:400,borderBottom:screen===item.id?"2px solid #2563EB":"2px solid transparent",paddingBottom:2,flexShrink:0}}>{item.label[lang]}</button>
       ))}
       <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:10}}>
@@ -1063,6 +1063,207 @@ function FirstRunHint({isES, onDemoF, onDemoM}) {
   );
 }
 
+
+function Screen5({lang}) {
+  const isES = lang === "ES";
+  const F = "Plus Jakarta Sans, sans-serif";
+  const TEAL = "#2A9D8F";
+  const NAVY = "#1E2D4E";
+  const BLUE = "#2563EB";
+  const [tab, setTab] = React.useState("npt");
+  const [weight, setWeight] = React.useState("");
+  const [condition, setCondition] = React.useState("normal");
+  const [kcalKg, setKcalKg] = React.useState("25");
+  const [dexPct, setDexPct] = React.useState("20");
+  const [lipPct, setLipPct] = React.useState("20");
+  const [aaPct, setAaPct] = React.useState("10");
+  const [vol, setVol] = React.useState("1000");
+  const [formula, setFormula] = React.useState("standard");
+  const [mlhr, setMlhr] = React.useState("");
+  const [hours, setHours] = React.useState("24");
+
+  const inp = {padding:"8px 12px",borderRadius:8,border:"0.5px solid #D4E3FF",fontSize:13,fontFamily:F,outline:"none",color:NAVY,background:"#F5F7FF",width:"100%",boxSizing:"border-box"};
+  const sel = {...inp,background:"#fff"};
+  const lab = {fontSize:12,color:"#3A5BA0",fontFamily:F,display:"block",marginBottom:4};
+
+  const conditions = [
+    {value:"normal", label:isES?"Normal / Sin estrés":"Normal / No stress", prot:"0.8-1.0"},
+    {value:"mild", label:isES?"Estrés leve (cirugía menor)":"Mild stress (minor surgery)", prot:"1.0-1.2"},
+    {value:"moderate", label:isES?"Estrés moderado (trauma, sepsis leve)":"Moderate stress (trauma, mild sepsis)", prot:"1.2-1.5"},
+    {value:"severe", label:isES?"Estrés severo (quemados, sepsis severa)":"Severe stress (burns, severe sepsis)", prot:"1.5-2.0"},
+    {value:"renal", label:isES?"Enfermedad renal sin diálisis":"Renal disease without dialysis", prot:"0.6-0.8"},
+    {value:"dialysis", label:isES?"Diálisis":"Dialysis", prot:"1.2-1.5"},
+  ];
+
+  const formulas = [
+    {value:"standard", label:isES?"Estándar (1.0 kcal/mL)":"Standard (1.0 kcal/mL)", kcal:1.0, prot:40},
+    {value:"hypercal", label:isES?"Hipercalórica (1.5 kcal/mL)":"Hypercaloric (1.5 kcal/mL)", kcal:1.5, prot:60},
+    {value:"hyper2", label:isES?"Hipercalórica 2.0 (2.0 kcal/mL)":"Hypercaloric 2.0 (2.0 kcal/mL)", kcal:2.0, prot:75},
+    {value:"peptide", label:isES?"Peptídica / Elemental":"Peptide / Elemental", kcal:1.0, prot:40},
+    {value:"renal", label:isES?"Renal (bajo K, P)":"Renal (low K, P)", kcal:2.0, prot:45},
+    {value:"diabetic", label:isES?"Diabética (bajo CHO)":"Diabetic (low CHO)", kcal:1.0, prot:42},
+    {value:"ensure", label:"Ensure Plus (1.5 kcal/mL)", kcal:1.5, prot:55},
+    {value:"fresubin", label:"Fresubin Energy (1.5 kcal/mL)", kcal:1.5, prot:56},
+    {value:"nutren", label:"Nutren 1.0 (1.0 kcal/mL)", kcal:1.0, prot:40},
+    {value:"novasource", label:"Novasource Renal (2.0 kcal/mL)", kcal:2.0, prot:74},
+  ];
+
+  const w = parseFloat(weight);
+  const totalKcal = w > 0 ? Math.round(w * parseFloat(kcalKg)) : null;
+  const condObj = conditions.find(c=>c.value===condition);
+  const protRange = condObj ? condObj.prot : "1.0-1.2";
+  const protMin = w > 0 ? +(w * parseFloat(protRange.split("-")[0])).toFixed(1) : null;
+  const protMax = w > 0 ? +(w * parseFloat(protRange.split("-")[1])).toFixed(1) : null;
+
+  const v = parseFloat(vol);
+  const dex = v > 0 ? +(v * parseFloat(dexPct)/100).toFixed(0) : null;
+  const dexKcal = dex ? Math.round(dex * 3.4) : null;
+  const aa = v > 0 ? +(v * parseFloat(aaPct)/100).toFixed(0) : null;
+  const aaKcal = aa ? Math.round(aa * 4) : null;
+  const lip = v > 0 ? +(v * parseFloat(lipPct)/100).toFixed(0) : null;
+  const lipKcal = lip ? Math.round(lip * 10) : null;
+  const totalNptKcal = (dexKcal&&aaKcal&&lipKcal) ? dexKcal+aaKcal+lipKcal : null;
+  const osm = (dex&&aa) ? Math.round(dex*50 + aa*100) : null;
+
+  const fObj = formulas.find(f=>f.value===formula);
+  const mlh = parseFloat(mlhr);
+  const h = parseFloat(hours);
+  const totalNEml = mlh > 0 && h > 0 ? Math.round(mlh * h) : null;
+  const totalNEkcal = totalNEml && fObj ? Math.round(totalNEml * fObj.kcal) : null;
+  const totalNEprot = totalNEml && fObj ? Math.round(totalNEml * fObj.prot / 1000) : null;
+
+  const card = {background:"#fff",border:"0.5px solid #D4E3FF",borderRadius:12,padding:20,marginBottom:12};
+  const res = (label,value,unit,color=BLUE,bg="#EFF6FF") => (
+    <div style={{background:bg,borderRadius:8,padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+      <span style={{fontSize:12,color:NAVY,fontFamily:F}}>{label}</span>
+      <span style={{fontSize:15,fontWeight:500,color,fontFamily:F}}>{value} <span style={{fontSize:11}}>{unit}</span></span>
+    </div>
+  );
+
+  return (
+    <div style={{padding:"24px 32px",maxWidth:900,margin:"0 auto"}}>
+      <div style={{fontSize:11,fontWeight:500,color:TEAL,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:4,fontFamily:F}}>{isES?"Nutrición clínica especializada":"Specialized clinical nutrition"}</div>
+      <div style={{fontSize:22,fontWeight:500,color:NAVY,marginBottom:4,fontFamily:F}}>{isES?"Nutrición Parenteral y Enteral":"Parenteral and Enteral Nutrition"}</div>
+      <div style={{fontSize:12,color:"#3A5BA0",marginBottom:20,fontFamily:F}}>{isES?"Basado en guías ASPEN 2022":"Based on ASPEN 2022 guidelines"}</div>
+
+      <div style={{display:"flex",gap:8,marginBottom:20}}>
+        {[{id:"npt",es:"Parenteral (NPT)",en:"Parenteral (TPN)"},{id:"ne",es:"Enteral (NE)",en:"Enteral (EN)"}].map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"8px 20px",borderRadius:20,border:"0.5px solid #D4E3FF",background:tab===t.id?NAVY:"#fff",color:tab===t.id?"#E2E8F0":NAVY,fontSize:13,fontWeight:tab===t.id?500:400,fontFamily:F,cursor:"pointer"}}>
+            {isES?t.es:t.en}
+          </button>
+        ))}
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+        <div>
+          <div style={card}>
+            <div style={{fontSize:13,fontWeight:500,color:NAVY,marginBottom:12,fontFamily:F}}>{isES?"Datos del paciente":"Patient data"}</div>
+            <label style={lab}>{isES?"Peso (kg)":"Weight (kg)"}</label>
+            <input style={{...inp,marginBottom:10}} type="number" value={weight} onChange={e=>setWeight(e.target.value)} placeholder="70" />
+            <label style={lab}>{isES?"Condición clínica":"Clinical condition"}</label>
+            <select style={{...sel,marginBottom:10}} value={condition} onChange={e=>setCondition(e.target.value)}>
+              {conditions.map(c=><option key={c.value} value={c.value}>{c.label}</option>)}
+            </select>
+            <label style={lab}>{isES?"Meta calórica (kcal/kg/día)":"Caloric goal (kcal/kg/day)"}</label>
+            <select style={sel} value={kcalKg} onChange={e=>setKcalKg(e.target.value)}>
+              <option value="20">20 kcal/kg — {isES?"estrés severo/obesidad":"severe stress/obesity"}</option>
+              <option value="25">25 kcal/kg — {isES?"mantenimiento":"maintenance"}</option>
+              <option value="30">30 kcal/kg — {isES?"repleción moderada":"moderate repletion"}</option>
+              <option value="35">35 kcal/kg — {isES?"repleción agresiva":"aggressive repletion"}</option>
+            </select>
+          </div>
+
+          {tab==="npt"&&(
+            <div style={card}>
+              <div style={{fontSize:13,fontWeight:500,color:NAVY,marginBottom:12,fontFamily:F}}>{isES?"Componentes NPT":"TPN components"}</div>
+              <label style={lab}>{isES?"Volumen total (mL)":"Total volume (mL)"}</label>
+              <input style={{...inp,marginBottom:10}} type="number" value={vol} onChange={e=>setVol(e.target.value)} />
+              <label style={lab}>{isES?"Dextrosa (% concentración)":"Dextrose (% concentration)"}</label>
+              <select style={{...sel,marginBottom:10}} value={dexPct} onChange={e=>setDexPct(e.target.value)}>
+                {["5","10","15","20","25","30","35","40","50","70"].map(v=><option key={v} value={v}>{v}% — {Math.round(parseFloat(vol||1000)*parseFloat(v)/100)}g</option>)}
+              </select>
+              <label style={lab}>{isES?"Aminoácidos (% concentración)":"Amino acids (% concentration)"}</label>
+              <select style={{...sel,marginBottom:10}} value={aaPct} onChange={e=>setAaPct(e.target.value)}>
+                {["3.5","5","7","8.5","10","15"].map(v=><option key={v} value={v}>{v}%</option>)}
+              </select>
+              <label style={lab}>{isES?"Lípidos (% concentración)":"Lipids (% concentration)"}</label>
+              <select style={sel} value={lipPct} onChange={e=>setLipPct(e.target.value)}>
+                {["10","20","30"].map(v=><option key={v} value={v}>{v}%</option>)}
+              </select>
+            </div>
+          )}
+
+          {tab==="ne"&&(
+            <div style={card}>
+              <div style={{fontSize:13,fontWeight:500,color:NAVY,marginBottom:12,fontFamily:F}}>{isES?"Parámetros de infusión":"Infusion parameters"}</div>
+              <label style={lab}>{isES?"Fórmula enteral":"Enteral formula"}</label>
+              <select style={{...sel,marginBottom:10}} value={formula} onChange={e=>setFormula(e.target.value)}>
+                {formulas.map(f=><option key={f.value} value={f.value}>{f.label}</option>)}
+              </select>
+              <label style={lab}>{isES?"Velocidad de infusión (mL/hr)":"Infusion rate (mL/hr)"}</label>
+              <input style={{...inp,marginBottom:10}} type="number" value={mlhr} onChange={e=>setMlhr(e.target.value)} placeholder="60" />
+              <label style={lab}>{isES?"Horas de infusión/día":"Infusion hours/day"}</label>
+              <select style={sel} value={hours} onChange={e=>setHours(e.target.value)}>
+                {["8","12","16","20","24"].map(h=><option key={h} value={h}>{h} {isES?"horas":"hours"}</option>)}
+              </select>
+            </div>
+          )}
+        </div>
+
+        <div>
+          {w>0&&(
+            <div style={card}>
+              <div style={{fontSize:13,fontWeight:500,color:NAVY,marginBottom:12,fontFamily:F}}>{isES?"Requerimientos del paciente":"Patient requirements"}</div>
+              {res(isES?"Meta calórica total":"Total caloric goal", totalKcal?.toLocaleString(), "kcal/día")}
+              {res(isES?"Proteínas recomendadas (ASPEN)":"Recommended protein (ASPEN)", `${protMin}–${protMax}`, "g/día", "#0F6E56", "#E1F5EE")}
+              {res(isES?"Rango g/kg/día":"Range g/kg/day", protRange, "g/kg/día", "#0F6E56", "#E1F5EE")}
+              <div style={{fontSize:10,color:"#3A5BA0",fontFamily:F,marginTop:8,padding:"6px 10px",background:"#F5F7FF",borderRadius:6}}>
+                {isES?"Fuente: ASPEN Clinical Guidelines 2022":"Source: ASPEN Clinical Guidelines 2022"}
+              </div>
+            </div>
+          )}
+
+          {tab==="npt"&&v>0&&(
+            <div style={card}>
+              <div style={{fontSize:13,fontWeight:500,color:NAVY,marginBottom:12,fontFamily:F}}>{isES?"Aporte NPT calculado":"Calculated TPN supply"}</div>
+              {res("Dextrosa", `${dex}g`, `→ ${dexKcal} kcal`)}
+              {res(isES?"Aminoácidos":"Amino acids", `${aa}g`, `→ ${aaKcal} kcal`, "#0F6E56", "#E1F5EE")}
+              {res(isES?"Lípidos":"Lipids", `${lip}g`, `→ ${lipKcal} kcal`, "#854F0B", "#FAEEDA")}
+              {res(isES?"Total calórico NPT":"Total TPN calories", totalNptKcal?.toLocaleString(), "kcal", NAVY, "#F5F7FF")}
+              {osm&&(
+                <div style={{marginTop:8,padding:"8px 12px",borderRadius:8,background:osm>900?"#FCEBEB":"#E1F5EE",border:`0.5px solid ${osm>900?"#A32D2D":"#0F6E56"}`}}>
+                  <span style={{fontSize:12,fontFamily:F,color:osm>900?"#A32D2D":"#0F6E56",fontWeight:500}}>
+                    {isES?"Osmolaridad estimada":"Estimated osmolarity"}: {osm} mOsm/L
+                    {osm>900?(isES?" — Vía central requerida":" — Central access required"):(isES?" — Periférica posible":" — Peripheral possible")}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {tab==="ne"&&mlh>0&&(
+            <div style={card}>
+              <div style={{fontSize:13,fontWeight:500,color:NAVY,marginBottom:12,fontFamily:F}}>{isES?"Aporte enteral calculado":"Calculated enteral supply"}</div>
+              {res(isES?"Volumen total/día":"Total volume/day", totalNEml?.toLocaleString(), "mL/día")}
+              {res(isES?"Calorías aportadas":"Calories provided", totalNEkcal?.toLocaleString(), "kcal/día", "#0F6E56", "#E1F5EE")}
+              {res(isES?"Proteínas aportadas":"Protein provided", totalNEprot, "g/día", "#854F0B", "#FAEEDA")}
+              {fObj&&res(isES?"Densidad calórica":"Caloric density", fObj.kcal, "kcal/mL", NAVY, "#F5F7FF")}
+              {w>0&&totalNEkcal&&(
+                <div style={{marginTop:8,padding:"8px 12px",borderRadius:8,background:totalNEkcal>=totalKcal*0.8?"#E1F5EE":"#FAEEDA"}}>
+                  <span style={{fontSize:12,fontFamily:F,color:totalNEkcal>=totalKcal*0.8?"#0F6E56":"#854F0B",fontWeight:500}}>
+                    {Math.round(totalNEkcal/totalKcal*100)}% {isES?"de la meta calórica":"of caloric goal"}
+                    {totalNEkcal>=totalKcal*0.8?(isES?" — Meta alcanzada":" — Goal reached"):(isES?" — Aumentar velocidad":" — Increase rate")}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function StudyPanel({isES, patient, geb, vet, bmi, bs, hasData, F}) {
   if (!hasData) return null;
   const wkg = +(patient.weightLb * 0.453592).toFixed(1);
@@ -1166,6 +1367,7 @@ export default function App() {
           {screen==="s2"&&<Screen2 lang={lang} state={patientState} setState={setPatientState} setScreen={setScreen} isMobile={isMobile}/>}
           {screen==="s3"&&<Screen3Wrapper lang={lang} state={patientState} setScreen={setScreen} studyMode={studyMode}/>}
           {screen==="s4"&&<Screen4 lang={lang} isMobile={isMobile}/>}
+          {screen==="s5"&&<Screen5 lang={lang}/>}
         </div>
       </div>
     {showCases&&<CasesDrawer isES={lang==="ES"} cases={savedCases} onLoad={loadCase} onDelete={deleteCase} onClose={()=>setShowCases(false)} onPortfolio={()=>{setShowCases(false);setShowPortfolio(true);}} isMobile={isMobile}/>}
