@@ -1061,7 +1061,7 @@ function FirstRunHint({isES, onDemoF, onDemoM}) {
           </div>
         ))}
       </div>
-      <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:12}}>
+      <div style={{display:"flex",flexWrap:"nowrap",gap:8,marginTop:12,overflowX:"auto"}}>
         {onDemoF&&<button onClick={onDemoF} style={{padding:"8px 18px",borderRadius:8,background:"#2563EB",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Paciente F (ejemplo)":"Female patient (example)"}</button>}
         {onDemoM&&<button onClick={()=>onDemoM()} style={{padding:"8px 16px",borderRadius:8,background:"#1E2D4E",color:"#E2E8F0",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Paciente M (ejemplo)":"Male patient (example)"}</button>}
         {onDemoM&&<button onClick={()=>onDemoM("dm2")} style={{padding:"8px 16px",borderRadius:8,background:"#7C3AED",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Carlos — DM2 (ejemplo)":"Carlos — T2D (example)"}</button>}
