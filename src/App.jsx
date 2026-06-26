@@ -1348,6 +1348,7 @@ export default function App() {
   function loadCase(c){setPatientState(c.snapshot);setShowCases(false);}
   function deleteCase(id){setSavedCases(savedCases.filter(c=>c.id!==id));}
   const isFirstRun = savedCases.length===0;
+  useEffect(()=>{const h=window.location.hash.replace("#","");if(["s1","s2","s4","s5"].includes(h))setScreen(h);},[]);
   function setPatientState(updater){setPatientStateRaw(prev=>{const next=typeof updater==="function"?updater(prev):updater;try{localStorage.setItem(LS_KEY_PATIENT,JSON.stringify(next));}catch{}return next;});}
 
   useEffect(()=>{const check=()=>setIsMobile(window.innerWidth<768);check();window.addEventListener("resize",check);return()=>window.removeEventListener("resize",check);},[]);
