@@ -143,6 +143,7 @@ function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade,setCaseStarted
         <div style={{width:8,height:8,borderRadius:"50%",background:"#2563EB"}}/>
         <span style={{fontSize:15,fontWeight:600,color:"#E2E8F0",fontFamily:F}}>nutrionally <span style={{fontWeight:400,color:"#93C5FD",fontSize:13}}>learn</span></span>
       </button>
+      <a href="https://nutrionally.com" target="_blank" rel="noopener noreferrer" style={{fontSize:11,color:"#93C5FD",fontFamily:F,textDecoration:"none",padding:"3px 8px",borderRadius:6,border:"0.5px solid #3A5BA0",marginLeft:4}}>nutrionally.com ↗</a>
       {!isMobile&&[{id:"s1",label:{ES:"Calculadora",EN:"Calculator"}},{id:"s4",label:{ES:"Lista de alimentos",EN:"Food list"}},{id:"s5",label:{ES:"Nutrición Parenteral y Enteral",EN:"Parenteral and Enteral Nutrition"}}].map(item=>(
         <button key={item.id} onClick={()=>setScreen(item.id)} style={{fontSize:13,fontFamily:F,background:"none",border:"none",cursor:"pointer",color:screen===item.id?"#93C5FD":"#8B949E",fontWeight:screen===item.id?500:400,borderBottom:screen===item.id?"2px solid #2563EB":"2px solid transparent",paddingBottom:2,flexShrink:0}}>{item.label[lang]}</button>
       ))}
