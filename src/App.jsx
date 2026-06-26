@@ -1,3 +1,4 @@
+import { jsPDF as JsPDFClass } from "jspdf";
 import React, { useState, useEffect, useMemo, createContext, useContext, useRef } from "react";
 
 const StudyModeContext = createContext({ studyMode: false, setStudyMode: () => {} });
@@ -1633,9 +1634,8 @@ function Screen7({lang}) {
 }
 
 
-async function generatePDF(state, lang) {
-  const JsPDF = await loadJsPDF();
-  const doc = new JsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+function generatePDF(state, lang) {
+  const doc = new JsPDFClass({orientation:"portrait",unit:"mm",format:"a4"});
   const isES = lang === "ES";
   const W = 210, M = 18;
   let y = 20;
