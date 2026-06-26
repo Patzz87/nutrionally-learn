@@ -32,7 +32,44 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  </head>
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://learn.nutrionally.com/#website",
+        "url": "https://learn.nutrionally.com",
+        "name": "nutrionally learn",
+        "description": "Calculadora clínica completa para nutriólogos y estudiantes: intercambios INCAP/USDA, Harris-Benedict, nutrición parenteral y enteral, modo estudio y casos clínicos.",
+        "inLanguage": ["es", "en"]
+      },
+      {
+        "@type": "WebApplication",
+        "@id": "https://learn.nutrionally.com/#webapp",
+        "name": "nutrionally learn — Calculadora clínica de nutrición",
+        "url": "https://learn.nutrionally.com",
+        "applicationCategory": "HealthApplication",
+        "operatingSystem": "Web",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "featureList": [
+          "Calculadora de intercambios INCAP/USDA",
+          "Harris-Benedict y macronutrientes clínicos",
+          "Nutrición Parenteral Total (NPT)",
+          "Nutrición Enteral (NE)",
+          "Modo estudio con casos clínicos",
+          "Lista de alimentos INCAP/USDA"
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
