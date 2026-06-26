@@ -1061,11 +1061,13 @@ function FirstRunHint({isES, onDemoF, onDemoM}) {
           </div>
         ))}
       </div>
-      {onDemoF&&<button onClick={onDemoF} style={{marginTop:12,padding:"8px 18px",borderRadius:8,background:"#2563EB",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Paciente F (ejemplo)":"Female patient (example)"}</button>}
-      {onDemoM&&<button onClick={()=>onDemoM()} style={{marginTop:8,padding:"8px 16px",borderRadius:8,background:"#1E2D4E",color:"#E2E8F0",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Paciente M (ejemplo)":"Male patient (example)"}</button>}
-      {onDemoM&&<button onClick={()=>onDemoM("dm2")} style={{marginTop:8,padding:"8px 16px",borderRadius:8,background:"#7C3AED",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Carlos — DM2 (ejemplo)":"Carlos — T2D (example)"}</button>}
-      {onDemoM&&<button onClick={()=>onDemoM("erc")} style={{marginTop:8,padding:"8px 16px",borderRadius:8,background:"#0F6E56",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Elena — ERC (ejemplo)":"Elena — CKD (example)"}</button>}
-      {onDemoM&&<button onClick={()=>onDemoM("ob")} style={{marginTop:8,padding:"8px 16px",borderRadius:8,background:"#B45309",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Roberto — Obesidad (ejemplo)":"Roberto — Obesity (example)"}</button>}
+      <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:12}}>
+        {onDemoF&&<button onClick={onDemoF} style={{padding:"8px 18px",borderRadius:8,background:"#2563EB",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Paciente F (ejemplo)":"Female patient (example)"}</button>}
+        {onDemoM&&<button onClick={()=>onDemoM()} style={{padding:"8px 16px",borderRadius:8,background:"#1E2D4E",color:"#E2E8F0",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Paciente M (ejemplo)":"Male patient (example)"}</button>}
+        {onDemoM&&<button onClick={()=>onDemoM("dm2")} style={{padding:"8px 16px",borderRadius:8,background:"#7C3AED",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Carlos — DM2 (ejemplo)":"Carlos — T2D (example)"}</button>}
+        {onDemoM&&<button onClick={()=>onDemoM("erc")} style={{padding:"8px 16px",borderRadius:8,background:"#0F6E56",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Elena — ERC (ejemplo)":"Elena — CKD (example)"}</button>}
+        {onDemoM&&<button onClick={()=>onDemoM("ob")} style={{padding:"8px 16px",borderRadius:8,background:"#B45309",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Roberto — Obesidad (ejemplo)":"Roberto — Obesity (example)"}</button>}
+      </div>
     </div>
   );
 }
