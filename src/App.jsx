@@ -1441,7 +1441,7 @@ function Screen7({lang}) {
   const [nitInput, setNitInput] = React.useState("");
   const [method, setMethod] = React.useState("protein");
 
-  const inputStyle = {width:"100%",padding:"8px 12px",borderRadius:8,border:"0.5px solid #2A3F5F",background:"#161B22",color:"#E2E8F0",fontSize:13,fontFamily:F,outline:"none",boxSizing:"border-box"};
+  const inputStyle = {width:"100%",padding:"8px 12px",borderRadius:8,border:"0.5px solid #D4E3FF",background:"#fff",color:"#1e293b",fontSize:13,fontFamily:F,outline:"none",boxSizing:"border-box"};
   const labelStyle = {fontSize:11,color:"#3A5BA0",fontFamily:F,display:"block",marginBottom:4};
   const resultBox = (label,value,unit,color=TEAL) => (
     <div style={{background:"#1C2733",borderRadius:8,padding:"10px 14px",marginBottom:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
