@@ -147,14 +147,14 @@ function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade,setCaseStarted
       {!isMobile&&[{id:"s1",label:{ES:"Calculadora",EN:"Calculator"}},{id:"s4",label:{ES:"Lista de alimentos",EN:"Food list"}},{id:"s5",label:{ES:"NPT / NE",EN:"PN / EN"}},{id:"s6",label:{ES:"Fórmulas GEB",EN:"GEB Formulas"}},{id:"s7",label:{ES:"Bal. nitrogenado",EN:"N Balance"}},{id:"s8",label:{ES:"Ireton-Jones",EN:"Ireton-Jones"}}].map(item=>(
         <button key={item.id} onClick={()=>setScreen(item.id)} style={{fontSize:13,fontFamily:F,background:"none",border:"none",cursor:"pointer",color:screen===item.id?"#93C5FD":"#8B949E",fontWeight:screen===item.id?500:400,borderBottom:screen===item.id?"2px solid #2563EB":"2px solid transparent",paddingBottom:2,flexShrink:0}}>{item.label[lang]}</button>
       ))}
-      <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:10}}>
+      <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:6}}>
         <div style={{display:"flex",borderRadius:8,overflow:"hidden",border:`1.5px solid ${studyMode?"#7C3AED":"#3A5BA0"}`}}>
           {[{val:false,label:{ES:"Calculadora",EN:"Calculator"},icon:"⊞"},{val:true,label:{ES:"Study Mode",EN:"Study Mode"},icon:"◎"}].map(opt=>{
             const active=studyMode===opt.val;
             return (
-              <button key={String(opt.val)} onClick={()=>setStudyMode(opt.val)} style={{padding:isMobile?"5px 10px":"5px 14px",fontSize:11,fontWeight:500,cursor:"pointer",fontFamily:F,background:active?(opt.val?"#7C3AED":"#2563EB"):"transparent",color:active?"#fff":"#8B949E",border:"none",display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap"}}>
+              <button key={String(opt.val)} onClick={()=>setStudyMode(opt.val)} style={{padding:"5px 10px",fontSize:11,fontWeight:500,cursor:"pointer",fontFamily:F,background:active?(opt.val?"#7C3AED":"#2563EB"):"transparent",color:active?"#fff":"#8B949E",border:"none",display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap"}}>
                 <span style={{fontSize:12}}>{opt.icon}</span>
-                {!isMobile&&opt.label[lang]}
+                
               </button>
             );
           })}
