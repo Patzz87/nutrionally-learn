@@ -144,7 +144,7 @@ function Navbar({lang,setLang,screen,setScreen,isMobile,onUpgrade,setCaseStarted
         <span style={{fontSize:15,fontWeight:600,color:"#E2E8F0",fontFamily:F}}>nutrionally <span style={{fontWeight:400,color:"#93C5FD",fontSize:13}}>learn</span></span>
       </button>
       <a href="https://nutrionally.com" target="_blank" rel="noopener noreferrer" style={{fontSize:11,color:"#93C5FD",fontFamily:F,textDecoration:"none",padding:"3px 8px",borderRadius:6,border:"0.5px solid #3A5BA0",marginLeft:4}}>nutrionally.com ↗</a>
-      {!isMobile&&[{id:"s1",label:{ES:"Calculadora",EN:"Calculator"}},{id:"s4",label:{ES:"Lista de alimentos",EN:"Food list"}},{id:"s5",label:{ES:"Nutrición Parenteral y Enteral",EN:"Parenteral and Enteral Nutrition"}}].map(item=>(
+      {!isMobile&&[{id:"s1",label:{ES:"Calculadora",EN:"Calculator"}},{id:"s4",label:{ES:"Lista de alimentos",EN:"Food list"}},{id:"s5",label:{ES:"Nutrición Parenteral y Enteral",EN:"Parenteral and Enteral Nutrition"}},{id:"s6",label:{ES:"Fórmulas de GEB",EN:"BMR Formulas"}},{id:"s7",label:{ES:"Balance nitrogenado",EN:"Nitrogen balance"}}].map(item=>(
         <button key={item.id} onClick={()=>setScreen(item.id)} style={{fontSize:13,fontFamily:F,background:"none",border:"none",cursor:"pointer",color:screen===item.id?"#93C5FD":"#8B949E",fontWeight:screen===item.id?500:400,borderBottom:screen===item.id?"2px solid #2563EB":"2px solid transparent",paddingBottom:2,flexShrink:0}}>{item.label[lang]}</button>
       ))}
       <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:10}}>
@@ -1328,6 +1328,195 @@ function StudyPanel({isES, patient, geb, vet, bmi, bs, hasData, F}) {
   );
 }
 
+function Screen6({lang}) {
+  const isES = lang === "ES";
+  const F = "Plus Jakarta Sans, sans-serif";
+  const TEAL = "#2A9D8F";
+  const NAVY = "#1E2D4E";
+  const BLUE = "#2563EB";
+  const [tab, setTab] = React.useState("mifflin");
+  const [weight, setWeight] = React.useState("");
+  const [height, setHeight] = React.useState("");
+  const [age, setAge] = React.useState("");
+  const [sex, setSex] = React.useState("F");
+  const [activity, setActivity] = React.useState("1.2");
+  const [temp, setTemp] = React.useState("");
+  const [ve, setVe] = React.useState("");
+  const [condition, setCondition] = React.useState("normal");
+
+  const w=parseFloat(weight), h=parseFloat(height), a=parseInt(age);
+  const actOpts=[{value:"1.2",label:isES?"Sedentario":"Sedentary"},{value:"1.375",label:isES?"Ligero (1-3d)":"Light (1-3d)"},{value:"1.55",label:isES?"Moderado (3-5d)":"Moderate (3-5d)"},{value:"1.725",label:isES?"Activo (6-7d)":"Active (6-7d)"},{value:"1.9",label:isES?"Muy activo":"Very active"}];
+  const stressOpts=[{value:"normal",label:isES?"Sin estrés":"No stress",factor:1.0},{value:"mild",label:isES?"Estrés leve (cirugía menor)":"Mild stress (minor surgery)",factor:1.2},{value:"moderate",label:isES?"Estrés moderado (cirugía mayor)":"Moderate stress (major surgery)",factor:1.35},{value:"severe",label:isES?"Estrés severo (sepsis, trauma)":"Severe stress (sepsis, trauma)",factor:1.5},{value:"burns",label:isES?"Quemaduras graves":"Severe burns",factor:1.8}];
+  const stress = stressOpts.find(s=>s.value===condition);
+
+  let mifflin=null, mifflin_tdee=null, mifflin_vet=null;
+  if(w&&h&&a){
+    mifflin = sex==="F" ? Math.round(10*w+6.25*h-5*a-161) : Math.round(10*w+6.25*h-5*a+5);
+    mifflin_tdee = Math.round(mifflin*parseFloat(activity));
+    mifflin_vet = Math.round(mifflin_tdee*stress.factor);
+  }
+
+  let pennState=null;
+  const t=parseFloat(temp), ve_val=parseFloat(ve);
+  if(w&&t&&ve_val){
+    const hb_m = sex==="F" ? Math.round(655+9.6*w+1.9*h-4.7*a) : Math.round(66+13.8*w+5*h-6.8*a);
+    pennState = Math.round(0.85*hb_m + 175*t + 33*ve_val - 6433);
+  }
+
+  const inputStyle = {width:"100%",padding:"8px 12px",borderRadius:8,border:"0.5px solid #D4E3FF",background:"#fff",color:NAVY,fontSize:13,fontFamily:F,outline:"none",boxSizing:"border-box"};
+  const labelStyle = {fontSize:11,color:"#3A5BA0",fontFamily:F,display:"block",marginBottom:4};
+  const resultBox = (label,value,unit,color=TEAL) => (
+    <div style={{background:"#F5F7FF",borderRadius:8,padding:"10px 14px",marginBottom:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+      <span style={{fontSize:12,color:NAVY,fontFamily:F}}>{label}</span>
+      <span style={{fontSize:15,fontWeight:500,color,fontFamily:F}}>{value} <span style={{fontSize:11}}>{unit}</span></span>
+    </div>
+  );
+
+  return (
+    <div style={{padding:"24px",maxWidth:700,margin:"0 auto"}}>
+      <div style={{fontSize:11,fontWeight:500,color:TEAL,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:6,fontFamily:F}}>{isES?"Fórmulas de GEB / GET":"BMR / TEE Formulas"}</div>
+      <div style={{fontSize:20,fontWeight:500,color:NAVY,marginBottom:4,fontFamily:F}}>{isES?"Mifflin-St.Jeor y Penn State":"Mifflin-St.Jeor and Penn State"}</div>
+      <div style={{fontSize:12,color:"#3A5BA0",marginBottom:20,fontFamily:F}}>{isES?"Fórmulas para pacientes no críticos y ventilados":"Formulas for non-critical and ventilated patients"}</div>
+
+      <div style={{display:"flex",gap:8,marginBottom:20}}>
+        {[{id:"mifflin",label:"Mifflin-St.Jeor"},{id:"pennstate",label:"Penn State"}].map(t=>(<button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"7px 16px",borderRadius:20,border:"0.5px solid #2A3F5F",background:tab===t.id?TEAL:"transparent",color:tab===t.id?"#fff":"#8B949E",fontSize:12,fontFamily:F,cursor:"pointer"}}>{t.label}</button>))}
+      </div>
+
+      {tab==="mifflin"&&(<div>
+        <div style={{background:"#EFF6FF",borderRadius:10,padding:16,marginBottom:12,fontSize:12,color:"#3A5BA0",fontFamily:F}}>
+          <strong style={{color:BLUE}}>Mifflin-St.Jeor</strong> — {isES?"Más precisa que Harris-Benedict en pacientes no críticos. Fórmula:":"More accurate than Harris-Benedict in non-critical patients. Formula:"}<br/>
+          <span style={{color:NAVY}}>♀ GEB = (10 × kg) + (6.25 × cm) − (5 × edad) − 161</span><br/>
+          <span style={{color:NAVY}}>♂ GEB = (10 × kg) + (6.25 × cm) − (5 × edad) + 5</span>
+        </div>
+        <div style={{display:"flex",gap:8,marginBottom:12}}>
+          {["F","M"].map(s=>(<button key={s} onClick={()=>setSex(s)} style={{padding:"6px 14px",borderRadius:20,border:"0.5px solid #2A3F5F",background:sex===s?BLUE:"transparent",color:sex===s?"#fff":"#8B949E",fontSize:12,fontFamily:F,cursor:"pointer"}}>{s==="F"?(isES?"Femenino":"Female"):(isES?"Masculino":"Male")}</button>))}
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+          <div><label style={labelStyle}>{isES?"Peso (kg)":"Weight (kg)"}</label><input type="number" value={weight} onChange={e=>setWeight(e.target.value)} style={inputStyle}/></div>
+          <div><label style={labelStyle}>{isES?"Talla (cm)":"Height (cm)"}</label><input type="number" value={height} onChange={e=>setHeight(e.target.value)} style={inputStyle}/></div>
+          <div><label style={labelStyle}>{isES?"Edad (años)":"Age (years)"}</label><input type="number" value={age} onChange={e=>setAge(e.target.value)} style={inputStyle}/></div>
+          <div><label style={labelStyle}>{isES?"Actividad":"Activity"}</label><select value={activity} onChange={e=>setActivity(e.target.value)} style={inputStyle}>{actOpts.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
+        </div>
+        <div style={{marginBottom:12}}><label style={labelStyle}>{isES?"Factor de estrés clínico":"Clinical stress factor"}</label><select value={condition} onChange={e=>setCondition(e.target.value)} style={inputStyle}>{stressOpts.map(o=><option key={o.value} value={o.value}>{o.label} (×{o.factor})</option>)}</select></div>
+        {mifflin&&(<div style={{marginTop:12}}>
+          {resultBox(isES?"GEB (Mifflin-St.Jeor)":"BMR (Mifflin-St.Jeor)", mifflin.toLocaleString(), "kcal/día")}
+          {resultBox(isES?"GET (con actividad)":"TEE (with activity)", mifflin_tdee.toLocaleString(), "kcal/día", BLUE)}
+          {resultBox(isES?"VET (con estrés clínico)":"TEE (with stress factor)", mifflin_vet.toLocaleString(), "kcal/día", "#F4C542")}
+          <div style={{fontSize:11,color:"#8B949E",fontFamily:F,padding:"8px 12px",background:"#F5F7FF",borderRadius:6,marginTop:4}}>
+            {isES?"Factor de estrés aplicado: ×"+stress.factor+" ("+stress.label+")":"Applied stress factor: ×"+stress.factor+" ("+stress.label+")"}
+          </div>
+        </div>)}
+      </div>)}
+
+      {tab==="pennstate"&&(<div>
+        <div style={{background:"#EFF6FF",borderRadius:10,padding:16,marginBottom:12,fontSize:12,color:"#3A5BA0",fontFamily:F}}>
+          <strong style={{color:BLUE}}>Penn State (2003b)</strong> — {isES?"Para pacientes en ventilación mecánica. Fórmula:":"For mechanically ventilated patients. Formula:"}<br/>
+          <span style={{color:NAVY}}>VET = 0.85 × HB + 175 × Temp(°C) + 33 × Ve(L/min) − 6433</span>
+        </div>
+        <div style={{display:"flex",gap:8,marginBottom:12}}>
+          {["F","M"].map(s=>(<button key={s} onClick={()=>setSex(s)} style={{padding:"6px 14px",borderRadius:20,border:"0.5px solid #2A3F5F",background:sex===s?BLUE:"transparent",color:sex===s?"#fff":"#8B949E",fontSize:12,fontFamily:F,cursor:"pointer"}}>{s==="F"?(isES?"Femenino":"Female"):(isES?"Masculino":"Male")}</button>))}
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+          <div><label style={labelStyle}>{isES?"Peso (kg)":"Weight (kg)"}</label><input type="number" value={weight} onChange={e=>setWeight(e.target.value)} style={inputStyle}/></div>
+          <div><label style={labelStyle}>{isES?"Talla (cm)":"Height (cm)"}</label><input type="number" value={height} onChange={e=>setHeight(e.target.value)} style={inputStyle}/></div>
+          <div><label style={labelStyle}>{isES?"Edad (años)":"Age (years)"}</label><input type="number" value={age} onChange={e=>setAge(e.target.value)} style={inputStyle}/></div>
+          <div><label style={labelStyle}>{isES?"Temperatura máxima (°C)":"Max temperature (°C)"}</label><input type="number" value={temp} onChange={e=>setTemp(e.target.value)} placeholder="37.5" style={inputStyle}/></div>
+          <div><label style={labelStyle}>{isES?"Ventilación minuto — Ve (L/min)":"Minute ventilation — Ve (L/min)"}</label><input type="number" value={ve} onChange={e=>setVe(e.target.value)} placeholder="8.5" style={inputStyle}/></div>
+        </div>
+        {pennState&&resultBox(isES?"VET Penn State (2003b)":"TEE Penn State (2003b)", pennState.toLocaleString(), "kcal/día", "#F4C542")}
+        {!pennState&&w&&(<div style={{fontSize:11,color:"#3A5BA0",fontFamily:F,padding:"8px 12px",background:"#F5F7FF",borderRadius:6}}>{isES?"Introduce temperatura máxima y ventilación minuto para calcular.":"Enter maximum temperature and minute ventilation to calculate."}</div>)}
+      </div>)}
+    </div>
+  );
+}
+
+function Screen7({lang}) {
+  const isES = lang === "ES";
+  const F = "Plus Jakarta Sans, sans-serif";
+  const TEAL = "#2A9D8F";
+  const NAVY = "#1E2D4E";
+  const BLUE = "#2563EB";
+  const [weight, setWeight] = React.useState("");
+  const [protInput, setProtInput] = React.useState("");
+  const [nitInput, setNitInput] = React.useState("");
+  const [method, setMethod] = React.useState("protein");
+
+  const inputStyle = {width:"100%",padding:"8px 12px",borderRadius:8,border:"0.5px solid #2A3F5F",background:"#161B22",color:"#E2E8F0",fontSize:13,fontFamily:F,outline:"none",boxSizing:"border-box"};
+  const labelStyle = {fontSize:11,color:"#3A5BA0",fontFamily:F,display:"block",marginBottom:4};
+  const resultBox = (label,value,unit,color=TEAL) => (
+    <div style={{background:"#1C2733",borderRadius:8,padding:"10px 14px",marginBottom:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+      <span style={{fontSize:12,color:"#8B949E",fontFamily:F}}>{label}</span>
+      <span style={{fontSize:15,fontWeight:500,color,fontFamily:F}}>{value} <span style={{fontSize:11}}>{unit}</span></span>
+    </div>
+  );
+
+  const w=parseFloat(weight);
+  const prot=parseFloat(protInput);
+  const nit=parseFloat(nitInput);
+
+  let bn=null, nIntake=null, nLoss=null;
+  if(method==="protein"&&w&&prot){
+    nIntake = +(prot/6.25).toFixed(1);
+    nLoss = +(w*0.1+2).toFixed(1);
+    bn = +(nIntake-nLoss).toFixed(1);
+  } else if(method==="nitrogen"&&nit){
+    nIntake = nit;
+    nLoss = w ? +(w*0.1+2).toFixed(1) : null;
+    bn = nLoss ? +(nit-nLoss).toFixed(1) : null;
+  }
+
+  const bnColor = bn===null?TEAL:bn>=0?"#0F6E56":"#A32D2D";
+  const bnBg = bn===null?"#F5F7FF":bn>=0?"#E1F5EE":"#FCEBEB";
+  const bnLabel = bn===null?"—":bn>2?(isES?"Anabolismo":"Anabolism"):bn>=-2?(isES?"Equilibrio":"Equilibrium"):(isES?"Catabolismo":"Catabolism");
+
+  return (
+    <div style={{padding:"24px",maxWidth:700,margin:"0 auto"}}>
+      <div style={{fontSize:11,fontWeight:500,color:TEAL,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:6,fontFamily:F}}>{isES?"Nutrición clínica":"Clinical nutrition"}</div>
+      <div style={{fontSize:20,fontWeight:500,color:NAVY,marginBottom:4,fontFamily:F}}>{isES?"Balance nitrogenado":"Nitrogen balance"}</div>
+      <div style={{fontSize:12,color:"#3A5BA0",marginBottom:20,fontFamily:F}}>{isES?"Evaluación del estado anabólico/catabólico del paciente":"Assessment of patient anabolic/catabolic state"}</div>
+
+      <div style={{background:"#EFF6FF",borderRadius:10,padding:16,marginBottom:16,fontSize:12,color:"#3A5BA0",fontFamily:F}}>
+        <strong style={{color:BLUE}}>{isES?"Fórmula:":"Formula:"}</strong><br/>
+        <span style={{color:NAVY}}>BN = N ingesta − N pérdidas</span><br/>
+        <span style={{color:NAVY}}>N ingesta = Proteínas (g) ÷ 6.25</span><br/>
+        <span style={{color:NAVY}}>N pérdidas = NUU (g/24h) + 2-4g {isES?"pérdidas insensibles":"insensible losses"}</span><br/>
+        <div style={{marginTop:8,display:"flex",gap:16}}>
+          <span>🟢 BN &gt; +2 = {isES?"Anabolismo":"Anabolism"}</span>
+          <span>🟡 BN −2 a +2 = {isES?"Equilibrio":"Equilibrium"}</span>
+          <span>🔴 BN &lt; −2 = {isES?"Catabolismo":"Catabolism"}</span>
+        </div>
+      </div>
+
+      <div style={{display:"flex",gap:8,marginBottom:16}}>
+        {[{id:"protein",label:isES?"Ingresar proteínas":"Enter protein"},{id:"nitrogen",label:isES?"Ingresar N directo":"Enter N directly"}].map(m=>(<button key={m.id} onClick={()=>setMethod(m.id)} style={{padding:"7px 16px",borderRadius:20,border:"0.5px solid #2A3F5F",background:method===m.id?TEAL:"transparent",color:method===m.id?"#fff":"#8B949E",fontSize:12,fontFamily:F,cursor:"pointer"}}>{m.label}</button>))}
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
+        <div><label style={labelStyle}>{isES?"Peso del paciente (kg)":"Patient weight (kg)"}</label><input type="number" value={weight} onChange={e=>setWeight(e.target.value)} style={inputStyle}/></div>
+        {method==="protein"
+          ?<div><label style={labelStyle}>{isES?"Proteínas administradas (g/día)":"Protein administered (g/day)"}</label><input type="number" value={protInput} onChange={e=>setProtInput(e.target.value)} style={inputStyle}/></div>
+          :<div><label style={labelStyle}>{isES?"Nitrógeno urinario en 24h (g)":"24h urinary nitrogen (g)"}</label><input type="number" value={nitInput} onChange={e=>setNitInput(e.target.value)} style={inputStyle}/></div>
+        }
+      </div>
+
+      {nIntake&&(<div style={{marginTop:4}}>
+        {resultBox(isES?"Nitrógeno administrado":"Nitrogen administered", nIntake, "g N/día")}
+        {nLoss&&resultBox(isES?"Nitrógeno perdido (estimado)":"Nitrogen lost (estimated)", nLoss, "g N/día", "#854F0B")}
+        {bn!==null&&(<div style={{background:bnBg,borderRadius:8,padding:"14px 16px",marginBottom:8,display:"flex",justifyContent:"space-between",alignItems:"center",border:`0.5px solid ${bnColor}`}}>
+          <span style={{fontSize:13,color:"#E2E8F0",fontFamily:F,fontWeight:500}}>{isES?"Balance nitrogenado":"Nitrogen balance"}</span>
+          <div style={{textAlign:"right"}}>
+            <span style={{fontSize:20,fontWeight:500,color:bnColor,fontFamily:F}}>{bn>0?"+":""}{bn} g N/día</span>
+            <div style={{fontSize:11,color:bnColor,fontFamily:F}}>{bnLabel}</div>
+          </div>
+        </div>)}
+        <div style={{fontSize:11,color:"#3A5BA0",fontFamily:F,padding:"8px 12px",background:"#F5F7FF",borderRadius:6}}>
+          {isES?"Meta clínica: BN ≥ 0 (equilibrio). En catabolismo severo buscar BN +4 a +6 g N/día. En UCI: puede requerir 1.5-2.5 g proteína/kg/día.":"Clinical goal: BN ≥ 0 (equilibrium). In severe catabolism aim for BN +4 to +6 g N/day. In ICU: may require 1.5-2.5 g protein/kg/day."}
+        </div>
+      </div>)}
+    </div>
+  );
+}
+
 export default function App() {
   const [lang,setLang]=useState("ES");
   const [screen,setScreen]=useState("s1");
@@ -1370,6 +1559,8 @@ export default function App() {
           {screen==="s3"&&<Screen3Wrapper lang={lang} state={patientState} setScreen={setScreen} studyMode={studyMode}/>}
           {screen==="s4"&&<Screen4 lang={lang} isMobile={isMobile}/>}
           {screen==="s5"&&<Screen5 lang={lang}/>}
+      {screen==="s6"&&<Screen6 lang={lang}/>}
+      {screen==="s7"&&<Screen7 lang={lang}/>}
         </div>
       </div>
     {showCases&&<CasesDrawer isES={lang==="ES"} cases={savedCases} onLoad={loadCase} onDelete={deleteCase} onClose={()=>setShowCases(false)} onPortfolio={()=>{setShowCases(false);setShowPortfolio(true);}} isMobile={isMobile}/>}
