@@ -1308,7 +1308,7 @@ function StudyPanel({isES, patient, geb, vet, bmi, bs, hasData, F}) {
   return (
     <div style={{background:"linear-gradient(135deg,#EFF6FF,#F0FDF4)",border:"0.5px solid #93C5FD",borderRadius:12,padding:"14px 16px",marginTop:12,fontFamily:F}}>
       <div style={{fontSize:10,fontWeight:600,color:"#2563EB",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:10}}>
-        {isES ? (state.condition==="ped"?"Modo estudio — Schofield (OMS)":"Modo estudio — Harris-Benedict") : (state.condition==="ped"?"Study mode — Schofield (WHO)":"Study mode — Harris-Benedict")}
+        {isES ? (patient.condition==="ped"?"Modo estudio — Schofield (OMS)":"Modo estudio — Harris-Benedict") : (patient.condition==="ped"?"Study mode — Schofield (WHO)":"Study mode — Harris-Benedict")}
       </div>
       <div style={{fontSize:11,color:"#1E2D4E",lineHeight:1.7,marginBottom:8}}>
         <div style={{fontWeight:500,marginBottom:4}}>{isES?"Formula:":"Formula:"}</div>
