@@ -1308,7 +1308,7 @@ function StudyPanel({isES, patient, geb, vet, bmi, bs, hasData, F}) {
   return (
     <div style={{background:"linear-gradient(135deg,#EFF6FF,#F0FDF4)",border:"0.5px solid #93C5FD",borderRadius:12,padding:"14px 16px",marginTop:12,fontFamily:F}}>
       <div style={{fontSize:10,fontWeight:600,color:"#2563EB",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:10}}>
-        {isES ? "Modo estudio — Harris-Benedict" : "Study mode — Harris-Benedict"}
+        {isES ? (state.condition==="ped"?"Modo estudio — Schofield (OMS)":"Modo estudio — Harris-Benedict") : (state.condition==="ped"?"Study mode — Schofield (WHO)":"Study mode — Harris-Benedict")}
       </div>
       <div style={{fontSize:11,color:"#1E2D4E",lineHeight:1.7,marginBottom:8}}>
         <div style={{fontWeight:500,marginBottom:4}}>{isES?"Formula:":"Formula:"}</div>
@@ -1698,7 +1698,7 @@ function generatePDF(state, lang) {
   doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(30,45,78);
   doc.text(isES?"Requerimiento energético":"Energy requirement", M+5, y+7);
   doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(58,91,160);
-  doc.text(`GEB (Harris-Benedict): ${geb} kcal/día`, M+5, y+15);
+  doc.text(`GEB (${patientState.condition==="ped"?"Schofield OMS":"Harris-Benedict"}): ${geb} kcal/día`, M+5, y+15);
   doc.text(`VET: ${vet} kcal/día`, M+5+half, y+15);
   y+=28;
 
