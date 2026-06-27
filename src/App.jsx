@@ -1080,6 +1080,7 @@ function FirstRunHint({isES, onDemoF, onDemoM}) {
         {onDemoM&&<button onClick={()=>onDemoM("dm2")} style={{padding:"8px 16px",borderRadius:8,background:"#7C3AED",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Carlos — DM2 (ejemplo)":"Carlos — T2D (example)"}</button>}
         {onDemoM&&<button onClick={()=>onDemoM("erc")} style={{padding:"8px 16px",borderRadius:8,background:"#0F6E56",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Elena — ERC (ejemplo)":"Elena — CKD (example)"}</button>}
         {onDemoM&&<button onClick={()=>onDemoM("ob")} style={{padding:"8px 16px",borderRadius:8,background:"#B45309",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Roberto — Obesidad (ejemplo)":"Roberto — Obesity (example)"}</button>}
+        {onDemoM&&<button onClick={()=>onDemoM("ped")} style={{padding:"8px 16px",borderRadius:8,background:"#085041",color:"#fff",fontSize:12,fontWeight:500,border:"none",cursor:"pointer",fontFamily:"Plus Jakarta Sans, sans-serif"}}>{isES?"Sofía — Pediatrico (ejemplo)":"Sofia — Pediatric (example)"}</button>}
       </div>
     </div>
   );
@@ -1789,6 +1790,7 @@ export default function App() {
               if(type==="dm2"){setPatientState({...DEMO_PATIENT_DM2});}
               else if(type==="erc"){setPatientState({...DEMO_PATIENT_ERC});}
               else if(type==="ob"){setPatientState({...DEMO_PATIENT_OB});}
+              else if(type==="ped"){setPatientState({...DEMO_PATIENT_PED});}
               else{setPatientState({...DEMO_PATIENT_M});}
               setCaseStarted(false);}}/></div>}
           {screen==="s1"&&<Screen1 lang={lang} state={patientState} setState={setPatientState} setScreen={setScreen} isMobile={isMobile} caseStarted={caseStarted} setCaseStarted={setCaseStarted}/>
