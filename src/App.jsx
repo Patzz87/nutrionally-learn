@@ -512,7 +512,7 @@ function Screen2({lang,state,setState,setScreen,isMobile}) {
             <div style={{fontSize:10,color:"#3A5BA0",marginTop:3,fontFamily:F}}>= (Kcal lip + Kcal HC) / (g prot x 0.16)</div>
           </div>
           {studyMode&&<div style={{background:"#1E2D4E",borderRadius:10,padding:"12px 14px"}}>
-            <div style={{fontSize:9,color:"#93C5FD",fontWeight:500,textTransform:"uppercase",letterSpacing:"0.05em",fontFamily:F,marginBottom:8}}>Harris-Benedict</div>
+            <div style={{fontSize:9,color:"#93C5FD",fontWeight:500,textTransform:"uppercase",letterSpacing:"0.05em",fontFamily:F,marginBottom:8}}>{state.condition==="ped"?"Schofield (OMS/WHO)":"Harris-Benedict"}</div>
             <div style={{fontSize:10,color:"#D4E3FF",fontFamily:"monospace",lineHeight:1.9}}>
               <div>F: 655+(9.6xkg)+(1.9xcm)-(4.7xedad)</div>
               <div style={{color:"#3A5BA0"}}>────</div>
@@ -908,6 +908,7 @@ const DEFAULT_PATIENT={caseName:"",sex:"F",weightLb:0,heightIn:0,age:0,waist:0,g
 const DEMO_PATIENT_M={caseName:"Paciente M",sex:"M",weightLb:185,heightIn:70,age:35,waist:98,goal:"bajar",activity:1,condition:"obesity",protPct:20,lipPct:25,hcPct:55,mealTimes:4,protG:0,lipG:0,hcG:0,vet:0,geb:0};
 const DEMO_PATIENT_DM2={caseName:"Carlos — DM2",sex:"M",weightLb:198,heightIn:67,age:52,waist:105,goal:"bajar",activity:1,condition:"dm2",protPct:20,lipPct:30,hcPct:50,mealTimes:4,protG:0,lipG:0,hcG:0,vet:0,geb:0,exchanges:null};
 const DEMO_PATIENT_ERC={caseName:"Elena — ERC",sex:"F",weightLb:154,heightIn:63,age:65,waist:92,goal:"mantener",activity:1,condition:"renal",protPct:10,lipPct:35,hcPct:55,mealTimes:4,protG:0,lipG:0,hcG:0,vet:0,geb:0,exchanges:null};
+const DEMO_PATIENT_PED={caseName:"Sofia — Pediatrico",sex:"F",weightLb:88,heightIn:55,age:10,waist:68,goal:"mantener",activity:1,condition:"ped",protPct:20,lipPct:30,hcPct:50,mealTimes:5,protG:0,lipG:0,hcG:0,vet:0,geb:0,exchanges:null};
 const DEMO_PATIENT_OB={caseName:"Roberto — Obesidad",sex:"M",weightLb:264,heightIn:69,age:44,waist:118,goal:"bajar",activity:1,condition:"obesity",protPct:25,lipPct:30,hcPct:45,mealTimes:5,protG:0,lipG:0,hcG:0,vet:0,geb:0,exchanges:null};
 const DEMO_PATIENT={caseName:"Maria (Ejemplo)",sex:"F",weightLb:185,heightIn:65,age:28,waist:95,goal:"mantener",activity:1,condition:"obesity",protPct:17,lipPct:30,hcPct:53,mealTimes:4,protG:0,lipG:0,hcG:0,vet:0,geb:0,exchanges:null};
 
