@@ -131,6 +131,16 @@ function adecColor(p) {
   return p>=90&&p<=110?{bg:"#EFF6FF",text:"#2563EB"}:p>=75?{bg:"#FAEEDA",text:"#854F0B"}:{bg:"#FCEBEB",text:"#A32D2D"};
 }
 
+
+function schofield(sex, wkg, age) {
+  // Schofield (1985) / WHO equations — kcal/day
+  if(age < 3)   return sex==="F" ? (61.0*wkg - 51)  : (60.9*wkg - 54);
+  if(age < 10)  return sex==="F" ? (22.5*wkg + 499) : (22.7*wkg + 495);
+  if(age < 18)  return sex==="F" ? (12.2*wkg + 746) : (17.5*wkg + 651);
+  if(age < 30)  return sex==="F" ? (14.7*wkg + 496) : (15.3*wkg + 679);
+  if(age < 60)  return sex==="F" ? (8.7*wkg  + 829) : (11.6*wkg + 879);
+  return sex==="F" ? (10.5*wkg + 596) : (13.5*wkg + 487);
+}
 function hamwi(sex,heightIn) {
   if(sex==="F") return +(45.5+2.3*(heightIn-60)).toFixed(1);
   return +(48.0+2.7*(heightIn-60)).toFixed(1);
@@ -191,8 +201,8 @@ function StepPills({lang,current,setScreen,onExportPDF}) {
 }
 
 const T1={
-  ES:{title:"Datos del caso",subtitle:"Ingresa los datos del paciente. Todo calcula en tiempo real.",caseName:"Nombre del caso",caseNamePH:"Ej. Paciente A — Caso 3",sex:"Sexo biologico",female:"Femenino",male:"Masculino",weight:"Peso",height:"Talla",age:"Edad",waist:"Cintura",years:"anos",goal:"Objetivo de peso",goals:[{key:"bajar",label:"Bajar peso",kcal:"20 Kcal/kg",icon:"↓"},{key:"mantener",label:"Mantener peso",kcal:"24 Kcal/kg",icon:"→"},{key:"subir",label:"Subir peso",kcal:"28 Kcal/kg",icon:"↑"}],activity:"Nivel de actividad",activities:["Muy sedentario","Poco activo","Activo","Muy activo"],condition:"Condicion de salud (opcional)",condOpts:[{key:"none",label:"Ninguna",disabled:false},{key:"dm2",label:"Diabetes tipo 2",disabled:false},{key:"obesity",label:"Obesidad",disabled:false},{key:"ped",label:"Pediatrico",disabled:true}],condNote:{dm2:"DM2: HC ajustado a 47% · 5 tiempos de comida (ADA 2024)",obesity:"Obesidad: se calcula el Peso Ideal segun Hamwi"},idealWeight:"Peso ideal (Hamwi)",results:"Resultados",bmi:"IMC",bmiS:{bajo:"Bajo peso",normal:"Normal",sobre:"Sobrepeso",obeso:"Obeso"},geb:"GEB (Metabolismo basal)",vet:"VET (Energia total)",kcalKg:"Kcal/kg asignadas",kcalDay:"kcal/dia",next:"Ver macronutrientes →",calc:"Calculado automaticamente",formula:"Harris-Benedict"},
-  EN:{title:"Case data",subtitle:"Enter patient data. Everything calculates in real time.",caseName:"Case name",caseNamePH:"E.g. Patient A — Case 3",sex:"Biological sex",female:"Female",male:"Male",weight:"Weight",height:"Height",age:"Age",waist:"Waist",years:"years",goal:"Weight goal",goals:[{key:"bajar",label:"Lose weight",kcal:"20 Kcal/kg",icon:"↓"},{key:"mantener",label:"Maintain weight",kcal:"24 Kcal/kg",icon:"→"},{key:"subir",label:"Gain weight",kcal:"28 Kcal/kg",icon:"↑"}],activity:"Activity level",activities:["Sedentary","Lightly active","Active","Very active"],condition:"Health condition (optional)",condOpts:[{key:"none",label:"None",disabled:false},{key:"dm2",label:"Type 2 Diabetes",disabled:false},{key:"obesity",label:"Obesity",disabled:false},{key:"ped",label:"Pediatric",disabled:true}],condNote:{dm2:"T2D: CHO adjusted to 47% · 5 meal times (ADA 2024)",obesity:"Obesity: Ideal Body Weight calculated using Hamwi formula"},idealWeight:"Ideal weight (Hamwi)",results:"Results",bmi:"BMI",bmiS:{bajo:"Underweight",normal:"Normal",sobre:"Overweight",obeso:"Obese"},geb:"BMR (Basal metabolic rate)",vet:"TDEE (Total daily energy)",kcalKg:"Assigned Kcal/kg",kcalDay:"kcal/day",next:"View macronutrients →",calc:"Calculated automatically",formula:"Harris-Benedict"},
+  ES:{title:"Datos del caso",subtitle:"Ingresa los datos del paciente. Todo calcula en tiempo real.",caseName:"Nombre del caso",caseNamePH:"Ej. Paciente A — Caso 3",sex:"Sexo biologico",female:"Femenino",male:"Masculino",weight:"Peso",height:"Talla",age:"Edad",waist:"Cintura",years:"anos",goal:"Objetivo de peso",goals:[{key:"bajar",label:"Bajar peso",kcal:"20 Kcal/kg",icon:"↓"},{key:"mantener",label:"Mantener peso",kcal:"24 Kcal/kg",icon:"→"},{key:"subir",label:"Subir peso",kcal:"28 Kcal/kg",icon:"↑"}],activity:"Nivel de actividad",activities:["Muy sedentario","Poco activo","Activo","Muy activo"],condition:"Condicion de salud (opcional)",condOpts:[{key:"none",label:"Ninguna",disabled:false},{key:"dm2",label:"Diabetes tipo 2",disabled:false},{key:"obesity",label:"Obesidad",disabled:false},{key:"ped",label:"Pediatrico",disabled:false}],condNote:{dm2:"DM2: HC ajustado a 47% · 5 tiempos de comida (ADA 2024)",obesity:"Obesidad: se calcula el Peso Ideal segun Hamwi",ped:"Pediatrico: GEB calculado con Schofield (OMS) · Proteina 1.0-1.5 g/kg"},idealWeight:"Peso ideal (Hamwi)",results:"Resultados",bmi:"IMC",bmiS:{bajo:"Bajo peso",normal:"Normal",sobre:"Sobrepeso",obeso:"Obeso"},geb:"GEB (Metabolismo basal)",vet:"VET (Energia total)",kcalKg:"Kcal/kg asignadas",kcalDay:"kcal/dia",next:"Ver macronutrientes →",calc:"Calculado automaticamente",formula:"Harris-Benedict",scholfield:"Schofield (OMS)"},
+  EN:{title:"Case data",subtitle:"Enter patient data. Everything calculates in real time.",caseName:"Case name",caseNamePH:"E.g. Patient A — Case 3",sex:"Biological sex",female:"Female",male:"Male",weight:"Weight",height:"Height",age:"Age",waist:"Waist",years:"years",goal:"Weight goal",goals:[{key:"bajar",label:"Lose weight",kcal:"20 Kcal/kg",icon:"↓"},{key:"mantener",label:"Maintain weight",kcal:"24 Kcal/kg",icon:"→"},{key:"subir",label:"Gain weight",kcal:"28 Kcal/kg",icon:"↑"}],activity:"Activity level",activities:["Sedentary","Lightly active","Active","Very active"],condition:"Health condition (optional)",condOpts:[{key:"none",label:"None",disabled:false},{key:"dm2",label:"Type 2 Diabetes",disabled:false},{key:"obesity",label:"Obesity",disabled:false},{key:"ped",label:"Pediatric",disabled:false}],condNote:{dm2:"T2D: CHO adjusted to 47% · 5 meal times (ADA 2024)",obesity:"Obesity: Ideal Body Weight calculated using Hamwi formula",ped:"Pediatric: BEE calculated with Schofield (WHO) · Protein 1.0-1.5 g/kg"},idealWeight:"Ideal weight (Hamwi)",results:"Results",bmi:"BMI",bmiS:{bajo:"Underweight",normal:"Normal",sobre:"Overweight",obeso:"Obese"},geb:"BMR (Basal metabolic rate)",vet:"TDEE (Total daily energy)",kcalKg:"Assigned Kcal/kg",kcalDay:"kcal/day",next:"View macronutrients →",calc:"Calculated automatically",formula:"Harris-Benedict"},
 };
 
 function Screen1({lang,state,setState,setScreen,isMobile,caseStarted,setCaseStarted}) {
@@ -213,6 +223,7 @@ function Screen1({lang,state,setState,setScreen,isMobile,caseStarted,setCaseStar
 
   useEffect(()=>{
     if(condition==="dm2") setState(p=>({...p,protPct:p.protPct||17,lipPct:p.lipPct||36,hcPct:47,mealTimes:5}));
+    else if(condition==="ped") setState(p=>({...p,protPct:20,lipPct:30,hcPct:50,mealTimes:5}));
     else if(condition==="none") setState(p=>({...p,hcPct:53,mealTimes:4}));
   },[condition]);
 
@@ -346,8 +357,8 @@ function Screen1({lang,state,setState,setScreen,isMobile,caseStarted,setCaseStar
                 <span style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",fontSize:12,color:condition!=="none"?"#2563EB":"#3A5BA0",pointerEvents:"none"}}>▾</span>
               </div>
               {condition!=="none"&&t.condNote[condition]&&(
-                <div style={{marginTop:10,padding:"9px 12px",borderRadius:8,background:condition==="dm2"?"#EFF6FF":"#F3E8FF",border:`1px solid ${condition==="dm2"?"#2563EB":"#7C3AED"}`,display:"flex",alignItems:"flex-start",gap:8}}>
-                  <span style={{fontSize:14,flexShrink:0}}>{condition==="dm2"?"💉":"⚖️"}</span>
+                <div style={{marginTop:10,padding:"9px 12px",borderRadius:8,background:condition==="dm2"?"#EFF6FF":condition==="ped"?"#E1F5EE":"#F3E8FF",border:`1px solid ${condition==="dm2"?"#2563EB":condition==="ped"?"#2A9D8F":"#7C3AED"}`,display:"flex",alignItems:"flex-start",gap:8}}>
+                  <span style={{fontSize:14,flexShrink:0}}>{condition==="dm2"?"💉":condition==="ped"?"🧒":"⚖️"}</span>
                   <span style={{fontSize:11,color:condition==="dm2"?"#1E2D4E":"#4C1D95",fontFamily:F,lineHeight:1.5}}>{t.condNote[condition]}</span>
                 </div>
               )}
